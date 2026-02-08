@@ -343,8 +343,17 @@
                 const data = await response.json();
 
                 document.getElementById('api-status').textContent = '✅ Connected';
-                document.getElementById('model-info').textContent =
-                    `ResNet50 on ${data.device} (${data.num_classes} classes)`;
+
+                if (data.mode === 'simple_demo') {
+                    document.getElementById('model-info').textContent =
+                        `Simple Demo Mode (${data.artifacts_loaded} artifacts loaded)`;
+                } else if (data.device) {
+                    document.getElementById('model-info').textContent =
+                        `ResNet50 on ${data.device} (${data.num_classes} classes)`;
+                } else {
+                    document.getElementById('model-info').textContent =
+                        `Ready (${data.artifacts_loaded || 0} artifacts)`;
+                }
             } catch (error) {
                 document.getElementById('api-status').textContent = '❌ Disconnected';
                 document.getElementById('model-info').textContent = 'Server not running';

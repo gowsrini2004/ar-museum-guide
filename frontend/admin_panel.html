@@ -452,33 +452,53 @@
                 return;
             }
 
-            const artifact = {
-                id: `artifact_${Date.now()}`,
-                name: document.getElementById('artifact-name').value,
-                category: document.getElementById('category').value,
-                period: document.getElementById('period').value,
-                origin: document.getElementById('origin').value,
-                description: document.getElementById('description').value,
-                curator: document.getElementById('curator').value || 'Museum Curator',
-                images: selectedFiles.length
-            };
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Uploading...';
 
-            // Save artifact data
-            artifacts.push(artifact);
-            localStorage.setItem('artifacts', JSON.stringify(artifacts));
+            try {
+                // Create FormData
+                const formData = new FormData();
+                formData.append('name', document.getElementById('artifact-name').value);
+                formData.append('category', document.getElementById('category').value);
+                formData.append('period', document.getElementById('period').value);
+                formData.append('origin', document.getElementById('origin').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('curator', document.getElementById('curator').value || 'Museum Curator');
 
-            // Save images to IndexedDB (for training)
-            await saveImagesToIndexedDB(artifact.id, selectedFiles);
+                // Add all images
+                selectedFiles.forEach((file, index) => {
+                    formData.append('images', file);
+                });
 
-            showStatus(`✅ Artifact "${artifact.name}" added successfully with ${selectedFiles.length} images!`, 'success');
+                // Upload to server
+                const response = await fetch('http://localhost:8001/api/artifacts/add', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            // Reset form
-            document.getElementById('artifact-form').reset();
-            selectedFiles = [];
-            imagePreview.innerHTML = '';
+                const result = await response.json();
 
-            loadArtifacts();
-            updateStats();
+                if (result.success) {
+                    showStatus(`✅ ${result.message}`, 'success');
+
+                    // Reset form
+                    document.getElementById('artifact-form').reset();
+                    selectedFiles = [];
+                    imagePreview.innerHTML = '';
+
+                    // Reload artifacts list
+                    await loadArtifacts();
+                    updateStats();
+                } else {
+                    showStatus(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Upload failed: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✅ Add Artifact';
+            }
         });
 
         // IndexedDB for storing images
@@ -516,9 +536,15 @@
         }
 
         // Load and display artifacts
-        function loadArtifacts() {
-            const stored = localStorage.getItem('artifacts');
-            artifacts = stored ? JSON.parse(stored) : [];
+        async function loadArtifacts() {
+            try {
+                const response = await fetch('http://localhost:8001/api/artifacts/list');
+                const data = await response.json();
+                artifacts = data.artifacts || [];
+            } catch (error) {
+                console.error('Failed to load artifacts:', error);
+                artifacts = [];
+            }
 
             const listEl = document.getElementById('artifact-list');
 
@@ -540,7 +566,7 @@
                             <span class="badge">${artifact.origin}</span>
                         </p>
                         <p>${artifact.description.substring(0, 100)}...</p>
-                        <p style="margin-top: 8px;"><strong>${artifact.images} training images</strong></p>
+                        <p style="margin-top: 8px;"><strong>${artifact.num_images || artifact.images || 0} training images</strong></p>
                     </div>
                 </div>
             `).join('');
@@ -572,13 +598,24 @@
             btn.disabled = true;
             btn.textContent = '🔄 Training... (this may take a few minutes)';
 
-            // Simulate training (in real implementation, this would call the API)
-            setTimeout(() => {
-                document.getElementById('model-status').textContent = 'Trained ✅';
-                showStatus('✅ Model trained successfully! You can now use it for predictions.', 'success');
+            try {
+                const response = await fetch('http://localhost:8001/api/model/train', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('model-status').textContent = 'Trained ✅';
+                    showStatus('✅ Model trained successfully! You can now use it for predictions.', 'success');
+                } else {
+                    showStatus(`❌ Training failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Training failed: ${error.message}`, 'error');
+            } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Train Model';
-            }, 3000);
+            }
         });
 
         // Initialize

@@ -1,3 +1,10 @@
 streamlit
 openai
 python-dotenv
+torch
+torchvision
+pillow
+fastapi
+uvicorn
+python-multipart
+numpy

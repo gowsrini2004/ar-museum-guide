@@ -386,7 +386,14 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8000';
+        // Auto-detect the correct API URL based on how the page is accessed
+        // If accessed via IP (from phone), use that IP. If via localhost, use localhost.
+        const hostname = window.location.hostname;
+        const API_URL = `http://${hostname}:8000`;
+        const TRAINING_API_URL = `http://${hostname}:8001`;
+
+        console.log('API URLs configured:', { API_URL, TRAINING_API_URL });
+
         let selectedFiles = [];
         let artifacts = [];
 
@@ -472,7 +479,7 @@
                 });
 
                 // Upload to server
-                const response = await fetch('http://localhost:8001/api/artifacts/add', {
+                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/add`, {
                     method: 'POST',
                     body: formData
                 });
@@ -538,7 +545,7 @@
         // Load and display artifacts
         async function loadArtifacts() {
             try {
-                const response = await fetch('http://localhost:8001/api/artifacts/list');
+                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/list`);
                 const data = await response.json();
                 artifacts = data.artifacts || [];
             } catch (error) {
@@ -599,7 +606,7 @@
             btn.textContent = '🔄 Training... (this may take a few minutes)';
 
             try {
-                const response = await fetch('http://localhost:8001/api/model/train', {
+                const response = await fetch(`${TRAINING_API_URL}/api/model/train`, {
                     method: 'POST'
                 });
                 const result = await response.json();

@@ -286,44 +286,11 @@
     </div>
 
     <script>
-        const artifacts = [
-            {
-                name: "Ancient Greek Amphora",
-                category: "Pottery",
-                period: "500 BCE",
-                origin: "Athens, Greece",
-                description: "This amphora is a fine example of Athenian red-figure pottery from the Classical period. The vessel features intricate scenes depicting daily life and mythology, characteristic of the period's artistic excellence.",
-                confidence: 0.92,
-                sources: [
-                    "Dr. Maria Konstantinou, Chief Curator",
-                    "Museum Historical Archive, 2023"
-                ]
-            },
-            {
-                name: "Egyptian Scarab Amulet",
-                category: "Jewelry",
-                period: "1500 BCE",
-                origin: "Thebes, Egypt",
-                description: "This scarab amulet is carved from blue faience, a glazed ceramic material highly prized in ancient Egypt. The base features hieroglyphic inscriptions invoking protection and good fortune.",
-                confidence: 0.88,
-                sources: [
-                    "Dr. Sarah Williams, Egyptology Department",
-                    "Egyptian Mythology Reference, Museum Library"
-                ]
-            },
-            {
-                name: "Ming Dynasty Vase",
-                category: "Ceramics",
-                period: "1450 CE",
-                origin: "Jingdezhen, China",
-                description: "This exceptional Ming Dynasty vase showcases the mastery of Jingdezhen potters. The cobalt blue dragon motifs are painted with remarkable precision on the white porcelain body.",
-                confidence: 0.95,
-                sources: [
-                    "Dr. Li Wei, Asian Art Curator",
-                    "Chinese Ceramic History Archive"
-                ]
-            }
-        ];
+        // Auto-detect API URL based on hostname
+        const hostname = window.location.hostname;
+        const API_URL = `http://${hostname}:8000`;
+
+        console.log('Using ML API:', API_URL);
 
         const fileInput = document.getElementById('file-input');
         const previewArea = document.getElementById('preview-area');
@@ -334,7 +301,7 @@
 
         fileInput.addEventListener('change', handleFileSelect);
 
-        function handleFileSelect(event) {
+        async function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -346,41 +313,61 @@
                 loading.style.display = 'block';
                 infoCard.style.display = 'none';
 
-                // Simulate recognition
-                setTimeout(() => {
-                    recognizeArtifact();
-                }, 2000);
+                // Call ML API for real recognition
+                recognizeArtifact(file);
             };
             reader.readAsDataURL(file);
         }
 
-        function recognizeArtifact() {
-            const artifact = artifacts[Math.floor(Math.random() * artifacts.length)];
+        async function recognizeArtifact(file) {
+            try {
+                // Create FormData and upload to ML API
+                const formData = new FormData();
+                formData.append('file', file);
 
-            document.getElementById('artifact-name').textContent = artifact.name;
-            document.getElementById('category').textContent = artifact.category;
-            document.getElementById('period').textContent = artifact.period;
-            document.getElementById('origin').textContent = artifact.origin;
-            document.getElementById('description').textContent = artifact.description;
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-            const confidencePercent = Math.round(artifact.confidence * 100);
-            document.getElementById('confidence-value').textContent = confidencePercent + '%';
-            document.getElementById('confidence-fill').style.width = confidencePercent + '%';
+                const result = await response.json();
 
-            // Update sources
-            const sourcesSection = document.getElementById('sources-section');
-            const existingSources = sourcesSection.querySelectorAll('.source-item');
-            existingSources.forEach(el => el.remove());
+                if (result.success && result.prediction) {
+                    const artifact = result.prediction;
 
-            artifact.sources.forEach(source => {
-                const sourceEl = document.createElement('div');
-                sourceEl.className = 'source-item';
-                sourceEl.textContent = source;
-                sourcesSection.appendChild(sourceEl);
-            });
+                    document.getElementById('artifact-name').textContent = artifact.artifact_name;
+                    document.getElementById('category').textContent = artifact.category;
+                    document.getElementById('period').textContent = artifact.period;
+                    document.getElementById('origin').textContent = artifact.origin;
+                    document.getElementById('description').textContent = artifact.description;
 
-            loading.style.display = 'none';
-            infoCard.style.display = 'block';
+                    const confidencePercent = Math.round(artifact.confidence * 100);
+                    document.getElementById('confidence-value').textContent = confidencePercent + '%';
+                    document.getElementById('confidence-fill').style.width = confidencePercent + '%';
+
+                    // Update sources
+                    const sourcesSection = document.getElementById('sources-section');
+                    const existingSources = sourcesSection.querySelectorAll('.source-item');
+                    existingSources.forEach(el => el.remove());
+
+                    const sources = result.sources || ['Museum Curator'];
+                    sources.forEach(source => {
+                        const sourceEl = document.createElement('div');
+                        sourceEl.className = 'source-item';
+                        sourceEl.textContent = source;
+                        sourcesSection.appendChild(sourceEl);
+                    });
+
+                    loading.style.display = 'none';
+                    infoCard.style.display = 'block';
+                } else {
+                    // Show error
+                    loading.innerHTML = `<div style="color: #f44336;">❌ ${result.message || 'Recognition failed'}</div>`;
+                }
+            } catch (error) {
+                console.error('Recognition error:', error);
+                loading.innerHTML = `<div style="color: #f44336;">❌ Error connecting to API. Make sure the server is running.</div>`;
+            }
         }
 
         function resetScan() {

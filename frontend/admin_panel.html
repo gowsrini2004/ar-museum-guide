@@ -185,23 +185,36 @@
 
         .artifact-list {
             display: grid;
-            gap: 16px;
+            gap: 20px;
         }
 
         .artifact-item {
             display: flex;
             gap: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            align-items: center;
+            padding: 24px;
+            background: white;
+            border-radius: 16px;
+            align-items: flex-start;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            position: relative;
         }
 
-        .artifact-item img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
+        .artifact-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .artifact-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            flex-shrink: 0;
         }
 
         .artifact-info {
@@ -209,25 +222,87 @@
         }
 
         .artifact-info h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #333;
         }
 
-        .artifact-info p {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 4px;
+        .artifact-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 6px 14px;
             background: #e3f2fd;
             color: #1976d2;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge.image-count {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge.trained {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.not-trained {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .artifact-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+        }
+
+        .training-status-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 12px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 600;
-            margin-right: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .training-status-badge.trained {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .training-status-badge.pending {
+            background: #fff3e0;
+            color: #ef6c00;
         }
 
         .status-message {
@@ -280,6 +355,83 @@
         .stat-label {
             font-size: 14px;
             color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .modal-content p {
+            margin-bottom: 24px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .model-info {
+            background: #f8f9ff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .model-info p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .model-info strong {
+            color: #333;
         }
     </style>
 </head>
@@ -343,6 +495,20 @@
 
                 <div id="image-preview" class="image-preview"></div>
 
+                <div class="form-group">
+                    <label>Upload PDF Documents (Optional) 📄</label>
+                    <div class="file-upload-area" id="pdf-upload-area"
+                        style="background: #fff9f0; border-color: #ff9800;">
+                        <div class="upload-icon">📄</div>
+                        <p><strong>Click to upload PDFs</strong> or drag and drop</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                            Upload historical documents, research papers, or curator notes
+                        </p>
+                    </div>
+                    <input type="file" id="pdf-input" class="file-input" multiple accept=".pdf">
+                    <div id="pdf-preview" style="margin-top: 12px;"></div>
+                </div>
+
                 <button type="submit" class="btn btn-primary" id="submit-btn">
                     ✅ Add Artifact
                 </button>
@@ -363,6 +529,13 @@
                 <h2>🤖 Model Training</h2>
                 <p style="margin-bottom: 20px;">Train the ML model on your artifact images</p>
 
+                <div id="model-info" class="model-info" style="display: none;">
+                    <p><strong>Model Status:</strong> <span id="model-status-text">Not Trained</span></p>
+                    <p id="model-timestamp-text" style="display: none;"><strong>Last Trained:</strong> <span
+                            id="model-timestamp"></span></p>
+                    <p><strong>Artifacts in Model:</strong> <span id="model-artifact-count">0</span></p>
+                </div>
+
                 <div class="training-stats">
                     <div class="stat-card">
                         <div class="stat-value" id="total-artifacts">0</div>
@@ -381,6 +554,32 @@
                 <button class="btn btn-success" id="train-btn">
                     🚀 Train Model
                 </button>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <h3>⚠️ Delete Artifact?</h3>
+                <p id="delete-message">Are you sure you want to delete this artifact? This will remove all training
+                    images and cannot be undone.</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                    <button class="btn btn-delete" id="confirm-delete-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retrain Confirmation Modal -->
+        <div id="retrain-modal" class="modal">
+            <div class="modal-content">
+                <h3>🔄 Retrain Model?</h3>
+                <p id="retrain-message">This will retrain the model with the current artifacts. The process may take a
+                    few minutes.</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeRetrainModal()">Cancel</button>
+                    <button class="btn btn-success" id="confirm-retrain-btn">Retrain</button>
+                </div>
             </div>
         </div>
     </div>
@@ -403,6 +602,7 @@
         const imagePreview = document.getElementById('image-preview');
 
         uploadArea.addEventListener('click', () => fileInput.click());
+        pdfUploadArea.addEventListener('click', () => pdfInput.click());
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -421,6 +621,11 @@
 
         fileInput.addEventListener('change', (e) => {
             handleFiles(e.target.files);
+        });
+
+        pdfInput.addEventListener('change', (e) => {
+            selectedPDFs = Array.from(e.target.files);
+            displayPDFPreviews();
         });
 
         function handleFiles(files) {
@@ -448,6 +653,32 @@
         function removeImage(index) {
             selectedFiles.splice(index, 1);
             displayImagePreviews();
+        }
+
+        function displayPDFPreviews() {
+            pdfPreview.innerHTML = '';
+            if (selectedPDFs.length === 0) return;
+
+            selectedPDFs.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e0e0e0;';
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 24px;">📄</span>
+                        <div>
+                            <div style="font-weight: 600; color: #333;">${file.name}</div>
+                            <div style="font-size: 12px; color: #666;">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                        </div>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removePDF(${index})" style="background: #ff5252; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1;">×</button>
+                `;
+                pdfPreview.appendChild(div);
+            });
+        }
+
+        function removePDF(index) {
+            selectedPDFs.splice(index, 1);
+            displayPDFPreviews();
         }
 
         // Form submission
@@ -492,7 +723,9 @@
                     // Reset form
                     document.getElementById('artifact-form').reset();
                     selectedFiles = [];
+                    selectedPDFs = [];
                     imagePreview.innerHTML = '';
+                    pdfPreview.innerHTML = '';
 
                     // Reload artifacts list
                     await loadArtifacts();
@@ -545,9 +778,12 @@
         // Load and display artifacts
         async function loadArtifacts() {
             try {
-                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/list`);
+                const response = await fetch(`${TRAINING_API_URL}/api/stats`);
                 const data = await response.json();
                 artifacts = data.artifacts || [];
+
+                // Update model info
+                updateModelInfo(data);
             } catch (error) {
                 console.error('Failed to load artifacts:', error);
                 artifacts = [];
@@ -560,28 +796,117 @@
                 return;
             }
 
-            listEl.innerHTML = artifacts.map(artifact => `
+            listEl.innerHTML = artifacts.map(artifact => {
+                const isTrained = artifact.has_images !== false;
+                const statusBadge = isTrained
+                    ? '<div class="training-status-badge trained">✅ Ready</div>'
+                    : '<div class="training-status-badge pending">⚠️ Pending</div>';
+
+                return `
                 <div class="artifact-item">
-                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px;">
-                        📸
-                    </div>
+                    ${statusBadge}
+                    <div class="artifact-icon">📸</div>
                     <div class="artifact-info">
                         <h3>${artifact.name}</h3>
-                        <p>
+                        <div class="artifact-meta">
                             <span class="badge">${artifact.category}</span>
                             <span class="badge">${artifact.period}</span>
                             <span class="badge">${artifact.origin}</span>
-                        </p>
-                        <p>${artifact.description.substring(0, 100)}...</p>
-                        <p style="margin-top: 8px;"><strong>${artifact.num_images || artifact.images || 0} training images</strong></p>
+                            <span class="badge image-count">📷 ${artifact.num_images || 0} images</span>
+                        </div>
+                        <p style="color: #666; margin-bottom: 8px;">${artifact.description.substring(0, 120)}${artifact.description.length > 120 ? '...' : ''}</p>
+                        <div class="artifact-actions">
+                            <button class="btn-delete" onclick="confirmDelete('${artifact.id}', '${artifact.name}')">
+                                🗑️ Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
+
+        function updateModelInfo(data) {
+            const modelInfoEl = document.getElementById('model-info');
+            const modelStatusText = document.getElementById('model-status-text');
+            const modelTimestampText = document.getElementById('model-timestamp-text');
+            const modelTimestamp = document.getElementById('model-timestamp');
+            const modelArtifactCount = document.getElementById('model-artifact-count');
+
+            if (data.model_trained) {
+                modelInfoEl.style.display = 'block';
+                modelStatusText.textContent = 'Trained ✅';
+                modelArtifactCount.textContent = data.total_artifacts;
+
+                if (data.model_timestamp) {
+                    const date = new Date(data.model_timestamp * 1000);
+                    modelTimestamp.textContent = date.toLocaleString();
+                    modelTimestampText.style.display = 'block';
+                }
+            } else {
+                modelInfoEl.style.display = 'none';
+            }
+        }
+
+        // Delete artifact functionality
+        let artifactToDelete = null;
+
+        function confirmDelete(artifactId, artifactName) {
+            artifactToDelete = artifactId;
+            document.getElementById('delete-message').textContent =
+                `Are you sure you want to delete "${artifactName}"? This will remove all ${artifacts.find(a => a.id === artifactId)?.num_images || 0} training images and cannot be undone.`;
+            document.getElementById('delete-modal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('show');
+            artifactToDelete = null;
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (!artifactToDelete) return;
+
+            const btn = document.getElementById('confirm-delete-btn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/${artifactToDelete}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`✅ ${result.message}`, 'success');
+                    closeDeleteModal();
+                    await loadArtifacts();
+                    updateStats();
+                } else {
+                    showStatus(`❌ Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Delete failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Delete';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('delete-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'delete-modal') {
+                closeDeleteModal();
+            }
+        });
+
+        document.getElementById('retrain-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'retrain-modal') {
+                closeRetrainModal();
+            }
+        });
 
         function updateStats() {
             document.getElementById('total-artifacts').textContent = artifacts.length;
-            const totalImages = artifacts.reduce((sum, a) => sum + a.images, 0);
+            const totalImages = artifacts.reduce((sum, a) => sum + (a.num_images || 0), 0);
             document.getElementById('total-images').textContent = totalImages;
         }
 
@@ -614,6 +939,8 @@
                 if (result.success) {
                     document.getElementById('model-status').textContent = 'Trained ✅';
                     showStatus('✅ Model trained successfully! You can now use it for predictions.', 'success');
+                    // Reload artifacts to update model info
+                    await loadArtifacts();
                 } else {
                     showStatus(`❌ Training failed: ${result.message}`, 'error');
                 }
@@ -624,6 +951,10 @@
                 btn.textContent = '🚀 Train Model';
             }
         });
+
+        function closeRetrainModal() {
+            document.getElementById('retrain-modal').classList.remove('show');
+        }
 
         // Initialize
         loadArtifacts();

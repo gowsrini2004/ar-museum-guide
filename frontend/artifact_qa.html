@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Museum Guide - Ask Questions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .artifact-selector {
+            background: white;
+            padding: 20px 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .artifact-selector label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .artifact-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+        }
+
+        .chat-container {
+            background: white;
+            height: 500px;
+            overflow-y: auto;
+            padding: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: #f0f0f0;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .message-sources {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+        }
+
+        .message.assistant .message-sources {
+            border-top-color: #ddd;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-right: 4px;
+            font-size: 11px;
+        }
+
+        .message.assistant .source-badge {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-container {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 0 0 16px 16px;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-wrapper button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-wrapper button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Ask About Artifacts</h1>
+            <p>Select an artifact and ask questions about its history, significance, and details</p>
+        </div>
+
+        <div class="artifact-selector">
+            <label for="artifact-select">Select Artifact:</label>
+            <select id="artifact-select">
+                <option value="">Loading artifacts...</option>
+            </select>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <div class="chat-container" id="chat-container">
+            <div class="empty-state">
+                <div class="icon">💬</div>
+                <h3>Start a Conversation</h3>
+                <p>Select an artifact and ask any question about it!</p>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="question-input" placeholder="Ask a question about this artifact..." disabled>
+                <button id="send-btn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect API URLs
+        const hostname = window.location.hostname;
+        const TRAINING_API_URL = `http://${hostname}:8001`;
+        const QA_API_URL = `http://${hostname}:8002`;
+
+        let artifacts = [];
+        let selectedArtifact = null;
+        let conversationHistory = [];
+
+        // Load artifacts
+        async function loadArtifacts() {
+            try {
+                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/list`);
+                const data = await response.json();
+                artifacts = data.artifacts || [];
+
+                const select = document.getElementById('artifact-select');
+                if (artifacts.length === 0) {
+                    select.innerHTML = '<option value="">No artifacts available</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Select an artifact...</option>' +
+                    artifacts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+
+                select.disabled = false;
+            } catch (error) {
+                console.error('Failed to load artifacts:', error);
+                showError('Failed to load artifacts. Please make sure the server is running.');
+            }
+        }
+
+        // Handle artifact selection
+        document.getElementById('artifact-select').addEventListener('change', (e) => {
+            const artifactId = e.target.value;
+            if (!artifactId) {
+                selectedArtifact = null;
+                document.getElementById('question-input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+                clearChat();
+                return;
+            }
+
+            selectedArtifact = artifacts.find(a => a.id === artifactId);
+            document.getElementById('question-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            clearChat();
+            conversationHistory = [];
+
+            // Show welcome message
+            addMessage('assistant', `Hi! I'm here to answer your questions about ${selectedArtifact.name}. What would you like to know?`);
+        });
+
+        // Handle send button
+        document.getElementById('send-btn').addEventListener('click', sendQuestion);
+        document.getElementById('question-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendQuestion();
+        });
+
+        async function sendQuestion() {
+            const input = document.getElementById('question-input');
+            const question = input.value.trim();
+
+            if (!question || !selectedArtifact) return;
+
+            // Add user message
+            addMessage('user', question);
+            input.value = '';
+
+            // Show typing indicator
+            showTyping();
+
+            // Disable input while processing
+            input.disabled = true;
+            document.getElementById('send-btn').disabled = true;
+
+            try {
+                const response = await fetch(`${QA_API_URL}/api/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        artifact_id: selectedArtifact.id,
+                        artifact_name: selectedArtifact.name,
+                        question: question
+                    })
+                });
+
+                const result = await response.json();
+                hideTyping();
+
+                if (result.success) {
+                    addMessage('assistant', result.answer, result.sources);
+                    conversationHistory.push({ question, answer: result.answer });
+                } else {
+                    addMessage('assistant', result.answer || 'Sorry, I couldn\'t process your question.');
+                    if (result.answer && result.answer.includes('No documents')) {
+                        showError('This artifact doesn\'t have any documents yet. Please ask the admin to upload PDF documents about this artifact.');
+                    }
+                }
+            } catch (error) {
+                hideTyping();
+                console.error('Error asking question:', error);
+                addMessage('assistant', 'Sorry, there was an error processing your question. Please make sure the Q&A server is running on port 8002.');
+                showError('Failed to connect to Q&A service. Please make sure the server is running.');
+            } finally {
+                input.disabled = false;
+                document.getElementById('send-btn').disabled = false;
+                input.focus();
+            }
+        }
+
+        function addMessage(role, content, sources = []) {
+            const chatContainer = document.getElementById('chat-container');
+            const emptyState = chatContainer.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = role === 'user' ? '👤' : '🤖';
+            let sourcesHtml = '';
+
+            if (sources && sources.length > 0) {
+                const uniquePages = [...new Set(sources.map(s => s.page))];
+                sourcesHtml = `<div class="message-sources">Sources: ${uniquePages.map(p => `<span class="source-badge">Page ${p}</span>`).join('')}</div>`;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    ${content}
+                    ${sourcesHtml}
+                </div>
+            `;
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const chatContainer = document.getElementById('chat-container');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message assistant';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="typing-indicator show">
+                    <span></span><span></span><span></span>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        function clearChat() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.innerHTML = '';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 5000);
+        }
+
+        // Initialize
+        loadArtifacts();
+    </script>
+</body>
+
+</html>

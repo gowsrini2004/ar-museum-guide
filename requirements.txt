@@ -8,3 +8,14 @@ fastapi
 uvicorn
 python-multipart
 numpy
+
+# PDF Processing
+PyPDF2>=3.0.0
+pdfplumber>=0.10.0
+
+# Embeddings & Vector Store
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# Google Gemini API
+google-generativeai>=0.3.0

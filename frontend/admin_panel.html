@@ -479,7 +479,10 @@
         <!-- Artifacts Tab -->
         <div id="artifacts-tab" class="tab-content active">
             <div class="card">
-                <h2>Manage Artifacts</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">Manage Artifacts</h2>
+                    <button onclick="refreshArtifacts()" class="btn btn-secondary">🔄 Refresh List</button>
+                </div>
                 <div id="artifacts-list" class="artifact-grid">
                     <div class="loading">
                         <p>Loading artifacts...</p>

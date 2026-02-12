@@ -601,6 +601,7 @@ async def delete_image_from_artifact(artifact_id: str, image_filename: str):
 @app.post("/api/artifacts/{artifact_id}/documents")
 async def upload_document_to_artifact(
     artifact_id: str,
+    background_tasks: BackgroundTasks,
     documents: List[UploadFile] = File(...)
 ):
     """Upload PDF documents to an artifact"""
@@ -657,12 +658,14 @@ async def upload_document_to_artifact(
                 with open(filepath, 'wb') as f:
                     f.write(contents)
                 
-                # Process with RAG service
-                success = rag_service.create_embeddings(
-                    artifact_id=artifact_id,
-                    pdf_path=str(filepath),
-                    document_id=doc_id,
-                    filename=original_filename
+                # Process with RAG service (BACKGROUND TASK)
+                print(f"   ⏳ Scheduled background embedding generation for {original_filename}")
+                background_tasks.add_task(
+                    run_embedding_task,
+                    artifact_id,
+                    str(filepath),
+                    doc_id,
+                    original_filename
                 )
                 
                 saved_documents.append({
@@ -670,7 +673,7 @@ async def upload_document_to_artifact(
                     "filename": original_filename,
                     "path": str(filepath.relative_to(DATA_DIR)),
                     "uploaded_at": datetime.now().isoformat(),
-                    "processed": success
+                    "processed": False # Will be true after background task
                 })
                 next_doc_num += 1
         

@@ -22,22 +22,37 @@ def run_server(port=8080):
     server_address = ('', port)
     httpd = HTTPServer(server_address, CORSRequestHandler)
     
+    # Enable SSL
+    import ssl
+    try:
+        httpd.socket = ssl.wrap_socket(
+            httpd.socket,
+            server_side=True,
+            certfile='cert.pem',
+            keyfile='key.pem',
+            ssl_version=ssl.PROTOCOL_TLS
+        )
+        protocol = "https"
+    except Exception as e:
+        print(f"Warning: SSL not enabled ({e}). Using HTTP.")
+        protocol = "http"
+    
     print(f"""
 ╔══════════════════════════════════════════════════════════╗
 ║          AR Museum Guide - Mobile Demo Server           ║
 ╚══════════════════════════════════════════════════════════╝
 
 🌐 Server running at:
-   - Local: http://localhost:{port}/ar_mobile_demo.html
+   - Local: {protocol}://localhost:{port}/ar_mobile_demo.html
    
 📱 To access on your phone:
    1. Make sure your phone is on the SAME WiFi network
    2. Find your computer's IP address:
       - Windows: Run 'ipconfig' and look for IPv4 Address
       - Mac/Linux: Run 'ifconfig' or 'ip addr'
-   3. Open on phone: http://YOUR_IP:{port}/ar_mobile_demo.html
+   3. Open on phone: {protocol}://YOUR_IP:{port}/ar_mobile_demo.html
    
-   Example: http://192.168.1.5:{port}/ar_mobile_demo.html
+   Example: {protocol}://192.168.1.5:{port}/ar_mobile_demo.html
 
 ⚠️  Important:
    - Allow camera permissions when prompted

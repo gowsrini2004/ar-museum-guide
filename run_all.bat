@@ -19,15 +19,15 @@ echo.
 
 :: 1. Start ML API (Port 8000)
 echo [1/4] Starting ML API (Port 8000)...
-start "AR Museum Guide - ML API" venv\Scripts\python.exe backend\ml_api.py
+start "AR Museum Guide - ML API" cmd /k "cd backend\ml_api && ..\..\venv\Scripts\python -m uvicorn main:app --host 0.0.0.0 --port 8000 --ssl-keyfile ..\..\key.pem --ssl-certfile ..\..\cert.pem --reload"
 
 :: 2. Start Training API (Port 8001)
 echo [2/4] Starting Training API (Port 8001)...
-start "AR Museum Guide - Training API" venv\Scripts\python.exe backend\training_api.py
+start "AR Museum Guide - Training API" cmd /k "cd backend && ..\venv\Scripts\python -m uvicorn training_api:app --host 0.0.0.0 --port 8001 --ssl-keyfile ..\key.pem --ssl-certfile ..\cert.pem --reload"
 
 :: 3. Start QA API (Port 8002)
 echo [3/4] Starting QA API (Port 8002)...
-start "AR Museum Guide - QA API" venv\Scripts\python.exe backend\qa_api.py
+start "AR Museum Guide - QA API" cmd /k "cd backend && ..\venv\Scripts\python -m uvicorn qa_api:app --host 0.0.0.0 --port 8002 --ssl-keyfile ..\key.pem --ssl-certfile ..\cert.pem --reload"
 
 :: 4. Start Web Server (Port 8080)
 echo [4/4] Starting Web Server (Port 8080)...

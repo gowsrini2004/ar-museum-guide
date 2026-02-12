@@ -619,7 +619,9 @@
         </div>
     </div>
     <script>
-        const API_BASE = `http://${window.location.hostname}:8001`;
+        const PROTOCOL = window.location.protocol;
+        const HOSTNAME = window.location.hostname;
+        const API_BASE = `${PROTOCOL}//${HOSTNAME}:8001`;
         let artifacts = [];
         let selectedImages = [];
         let selectedDocuments = [];

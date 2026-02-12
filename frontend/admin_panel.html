@@ -736,6 +736,18 @@
                     </div>
                 </div>
             `).join('');
+
+            // Restore expanded state if applicable
+            if (currentArtifact) {
+                const content = document.getElementById(`expand-${currentArtifact}`);
+                const icon = document.getElementById(`expand-icon-${currentArtifact}`);
+                if (content && icon) {
+                    content.classList.add('show');
+                    icon.textContent = '▲';
+                    loadArtifactImages(currentArtifact);
+                    loadDocuments(currentArtifact);
+                }
+            }
         }
 
         // Toggle expand and load images/documents on demand
@@ -743,12 +755,23 @@
             const content = document.getElementById(`expand-${artifactId}`);
             const icon = document.getElementById(`expand-icon-${artifactId}`);
 
+            // Close others first (optional, but keeps UI clean)
+            // artifacts.forEach(a => {
+            //     if (a.id !== artifactId) {
+            //         document.getElementById(`expand-${a.id}`)?.classList.remove('show');
+            //         const otherIcon = document.getElementById(`expand-icon-${a.id}`);
+            //         if (otherIcon) otherIcon.textContent = '▼';
+            //     }
+            // });
+
             if (content.classList.contains('show')) {
                 content.classList.remove('show');
                 icon.textContent = '▼';
+                currentArtifact = null; // Clear selection
             } else {
                 content.classList.add('show');
                 icon.textContent = '▲';
+                currentArtifact = artifactId; // Track selection
 
                 // Load images and documents only when expanded
                 loadArtifactImages(artifactId);

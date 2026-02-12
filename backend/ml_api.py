@@ -33,8 +33,16 @@ CLASS_MAPPING_PATH = MODEL_DIR / "class_mapping.json"
 def load_artifacts():
     """Load trained artifacts"""
     if ARTIFACTS_FILE.exists():
-        with open(ARTIFACTS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        print(f"Loading artifacts from: {ARTIFACTS_FILE.absolute()}")
+        try:
+            with open(ARTIFACTS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                print(f"Loaded {len(data)} artifacts")
+                return data
+        except Exception as e:
+            print(f"Error loading artifacts: {e}")
+            return []
+    print(f"Artifacts file not found at: {ARTIFACTS_FILE.absolute()}")
     return []
 
 def load_model():
@@ -101,10 +109,15 @@ async def predict_artifact(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         
+        # Try reloading if empty
+        global artifacts
+        if not artifacts or len(artifacts) == 0:
+            artifacts = load_artifacts()
+
         if not artifacts:
             return JSONResponse({
                 "success": False,
-                "message": "No artifacts trained yet. Please add artifacts via admin panel."
+                "message": f"No artifacts trained yet (Path: {ARTIFACTS_FILE.absolute()}). Please add artifacts via admin panel."
             })
         
         if model is None:
@@ -182,9 +195,13 @@ async def predict_artifact(file: UploadFile = File(...)):
 
 @app.get("/health")
 async def health_check():
+    # Reload artifacts to check current state
+    current_artifacts = load_artifacts()
     return {
         "status": "healthy",
-        "artifacts_loaded": len(artifacts),
+        "artifacts_loaded": len(current_artifacts),
+        "artifacts_file_path": str(ARTIFACTS_FILE.absolute()),
+        "file_exists": ARTIFACTS_FILE.exists(),
         "model_loaded": model is not None,
         "mode": "ml_trained"
     }

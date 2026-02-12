@@ -1,1 +1,133 @@
-[]
+[
+  {
+    "id": "artifact_1",
+    "name": "Srimad Bhagavad Gita ",
+    "category": "Scripture ",
+    "period": "982",
+    "origin": "Indian",
+    "description": "The Bhagavad Gita (\"Song of God\") is a 700-verse Hindu scripture, part of the epic Mahabharata (Bhishma Parva, chapters 23–40). Set on the battlefield of Kurukshetra, it is a dialogue between Prince Arjuna and his charioteer, Lord Krishna, an avatar of Vishnu. It is a foundational text of Hinduism that serves as a guide for ethical living, duty, and spiritual liberation. ",
+    "curator": "Vayasa",
+    "images": [
+      "training\\artifact_1\\artifact_1_1.jpg",
+      "training\\artifact_1\\artifact_1_2.jpg",
+      "training\\artifact_1\\artifact_1_3.jpg",
+      "training\\artifact_1\\artifact_1_4.jpg",
+      "training\\artifact_1\\artifact_1_5.jpg",
+      "training\\artifact_1\\artifact_1_6.jpg",
+      "training\\artifact_1\\artifact_1_7.jpg",
+      "training\\artifact_1\\artifact_1_8.jpg",
+      "training\\artifact_1\\artifact_1_9.jpg",
+      "training\\artifact_1\\artifact_1_10.jpg",
+      "training\\artifact_1\\artifact_1_11.jpg",
+      "training\\artifact_1\\artifact_1_12.jpg",
+      "training\\artifact_1\\artifact_1_13.jpg",
+      "training\\artifact_1\\artifact_1_14.jpg",
+      "training\\artifact_1\\artifact_1_15.jpg",
+      "training\\artifact_1\\artifact_1_16.jpg"
+    ],
+    "num_images": 16,
+    "documents": [
+      {
+        "id": "doc_1",
+        "filename": "The Bhagavad Gita.pdf",
+        "path": "documents\\artifact_1\\The Bhagavad Gita.pdf",
+        "uploaded_at": "2026-02-12T22:44:36.512966",
+        "processed": true
+      },
+      {
+        "id": "doc_2",
+        "filename": "bhagavad-gita-in-english-source-file.pdf",
+        "path": "documents\\artifact_1\\bhagavad-gita-in-english-source-file.pdf",
+        "uploaded_at": "2026-02-12T22:50:44.171488",
+        "processed": true
+      }
+    ],
+    "num_documents": 2,
+    "created_at": "2026-02-12T22:40:04.960054"
+  },
+  {
+    "id": "artifact_2",
+    "name": "Thirukural",
+    "category": "Scripture ",
+    "period": "500",
+    "origin": "Tamilnadu ",
+    "description": "Written By thiruvallur the great tamil poet",
+    "curator": "Thiruvalluvar",
+    "images": [
+      "training\\artifact_2\\artifact_2_1.jpg",
+      "training\\artifact_2\\artifact_2_2.jpg",
+      "training\\artifact_2\\artifact_2_3.jpg",
+      "training\\artifact_2\\artifact_2_4.jpg",
+      "training\\artifact_2\\artifact_2_5.jpg",
+      "training\\artifact_2\\artifact_2_6.jpg",
+      "training\\artifact_2\\artifact_2_7.jpg",
+      "training\\artifact_2\\artifact_2_8.jpg",
+      "training\\artifact_2\\artifact_2_9.jpg",
+      "training\\artifact_2\\artifact_2_10.jpg",
+      "training\\artifact_2\\artifact_2_11.jpg",
+      "training\\artifact_2\\artifact_2_12.jpg",
+      "training\\artifact_2\\artifact_2_13.jpg",
+      "training\\artifact_2\\artifact_2_14.jpg",
+      "training\\artifact_2\\artifact_2_15.jpg",
+      "training\\artifact_2\\artifact_2_16.jpg"
+    ],
+    "num_images": 16,
+    "documents": [
+      {
+        "id": "doc_1",
+        "filename": "kural.pdf",
+        "path": "documents\\artifact_2\\kural.pdf"
+      },
+      {
+        "id": "doc_2",
+        "filename": "pm0665.pdf",
+        "path": "documents\\artifact_2\\pm0665.pdf",
+        "uploaded_at": "2026-02-12T22:58:56.236997",
+        "processed": true
+      }
+    ],
+    "num_documents": 2,
+    "created_at": "2026-02-12T22:57:49.571671"
+  },
+  {
+    "id": "artifact_1770920155",
+    "name": "Shiva",
+    "category": "Idol",
+    "period": "500",
+    "origin": "Himalayas",
+    "description": "Idol ",
+    "curator": "Ahiva",
+    "images": [
+      "training\\artifact_1770920155\\artifact_1770920155_1.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_2.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_3.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_4.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_5.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_6.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_7.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_8.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_9.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_10.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_11.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_12.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_13.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_14.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_15.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_16.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_17.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_18.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_19.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_20.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_21.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_22.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_23.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_24.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_25.jpg",
+      "training\\artifact_1770920155\\artifact_1770920155_26.jpg"
+    ],
+    "num_images": 26,
+    "documents": [],
+    "num_documents": 0,
+    "created_at": "2026-02-12T23:46:00.596476"
+  }
+]

@@ -7,10 +7,14 @@ import os
 
 class CORSRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET')
-        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
-        return super().end_headers()
+        try:
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET')
+            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            return super().end_headers()
+        except (ConnectionResetError, ConnectionAbortedError):
+            # Silently handle browser closing connection
+            pass
 
     def log_message(self, format, *args):
         print(f"[{self.address_string()}] {format % args}")
@@ -22,37 +26,22 @@ def run_server(port=8080):
     server_address = ('', port)
     httpd = HTTPServer(server_address, CORSRequestHandler)
     
-    # Enable SSL
-    import ssl
-    try:
-        httpd.socket = ssl.wrap_socket(
-            httpd.socket,
-            server_side=True,
-            certfile='cert.pem',
-            keyfile='key.pem',
-            ssl_version=ssl.PROTOCOL_TLS
-        )
-        protocol = "https"
-    except Exception as e:
-        print(f"Warning: SSL not enabled ({e}). Using HTTP.")
-        protocol = "http"
-    
     print(f"""
 ╔══════════════════════════════════════════════════════════╗
 ║          AR Museum Guide - Mobile Demo Server           ║
 ╚══════════════════════════════════════════════════════════╝
 
 🌐 Server running at:
-   - Local: {protocol}://localhost:{port}/ar_mobile_demo.html
+   - Local: http://localhost:{port}/ar_mobile_demo.html
    
 📱 To access on your phone:
    1. Make sure your phone is on the SAME WiFi network
    2. Find your computer's IP address:
       - Windows: Run 'ipconfig' and look for IPv4 Address
       - Mac/Linux: Run 'ifconfig' or 'ip addr'
-   3. Open on phone: {protocol}://YOUR_IP:{port}/ar_mobile_demo.html
+   3. Open on phone: http://YOUR_IP:{port}/ar_mobile_demo.html
    
-   Example: {protocol}://192.168.1.5:{port}/ar_mobile_demo.html
+   Example: http://192.168.1.5:{port}/ar_mobile_demo.html
 
 ⚠️  Important:
    - Allow camera permissions when prompted

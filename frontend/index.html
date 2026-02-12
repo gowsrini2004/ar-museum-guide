@@ -886,7 +886,7 @@
                     const sources = data.sources.map(s => `Page ${s.page}`).join(', ');
                     addMessage(data.answer, 'assistant', sources ? `Sources: ${sources}` : null);
                 } else {
-                    addMessage('Sorry, I couldn\'t answer that question.', 'assistant');
+                    addMessage(data.answer || 'Sorry, I couldn\'t answer that question.', 'assistant');
                 }
             } catch (error) {
                 loadingMsg.remove();

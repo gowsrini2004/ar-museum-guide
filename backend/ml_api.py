@@ -60,7 +60,8 @@ def load_model():
     model.fc = nn.Linear(num_features, len(class_mapping))
     
     # Load trained weights
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    with open(MODEL_PATH, 'rb') as f:
+        model.load_state_dict(torch.load(f, map_location=torch.device('cpu')))
     model.eval()
     
     return model, class_mapping

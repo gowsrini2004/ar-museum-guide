@@ -18,7 +18,8 @@ from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
 # Google Gemini
-import google.generativeai as genai
+import google.genai as genai
+from chromadb.utils import embedding_functions
 
 
 class RAGService:
@@ -35,16 +36,28 @@ class RAGService:
             settings=Settings(anonymized_telemetry=False)
         )
         
-        # Initialize embedding model
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        # Initialize embedding model (lazy loaded)
+        self._embedding_model = None
         
         # Initialize Gemini
         if api_key:
-            genai.configure(api_key=api_key)
-            self.gemini_model = genai.GenerativeModel('gemini-pro')
+            self.client = genai.Client(api_key=api_key)
+            # Use models/ prefix as per 2026 SDK discovery
+            self.model_id = 'models/gemini-flash-lite-latest'
         else:
-            self.gemini_model = None
-    
+            self.client = None
+            self.model_id = None
+            
+    @property
+    def embedding_model(self):
+        """Lazy load the embedding model and return as a ChromaDB compliant function"""
+        if self._embedding_model is None:
+            # Use specific embedding function wrapper for ChromaDB
+            self._embedding_model = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name='all-MiniLM-L6-v2'
+            )
+        return self._embedding_model
+
     def extract_text_from_pdf(self, pdf_path: str) -> List[Dict[str, any]]:
         """
         Extract text from PDF with page numbers
@@ -114,7 +127,8 @@ class RAGService:
             collection_name = f"artifact_{artifact_id}"
             collection = self.chroma_client.get_or_create_collection(
                 name=collection_name,
-                metadata={"artifact_id": artifact_id}
+                metadata={"artifact_id": artifact_id},
+                embedding_function=self.embedding_model
             )
             
             # Process each page
@@ -166,7 +180,10 @@ class RAGService:
             
             # Check if collection exists
             try:
-                collection = self.chroma_client.get_collection(name=collection_name)
+                collection = self.chroma_client.get_collection(
+                    name=collection_name,
+                    embedding_function=self.embedding_model
+                )
             except Exception:
                 return {
                     'success': False,
@@ -196,7 +213,7 @@ class RAGService:
                                    for chunk, meta in zip(relevant_chunks, metadatas)])
             
             # Generate answer using Gemini
-            if not self.gemini_model:
+            if not self.client:
                 return {
                     'success': False,
                     'answer': "Gemini API is not configured. Please set your API key.",
@@ -221,7 +238,10 @@ Instructions:
 
 Answer:"""
             
-            response = self.gemini_model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_id,
+                contents=prompt
+            )
             answer = response.text
             
             # Format sources

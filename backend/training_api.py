@@ -110,10 +110,29 @@ def save_artifacts(artifacts):
         json.dump(artifacts, f, indent=2, ensure_ascii=False)
 
 
+def run_embedding_task(artifact_id: str, pdf_path: str, doc_id: str, filename: str):
+    """Background task wrapper for embedding generation"""
+    print(f"🔄 Starting background embedding generation for {filename}...")
+    try:
+        success = rag_service.create_embeddings(
+            artifact_id=artifact_id,
+            pdf_path=pdf_path,
+            document_id=doc_id,
+            filename=filename
+        )
+        if success:
+            print(f"✨ Embeddings created for {filename}")
+        else:
+            print(f"⚠️ Failed to create embeddings for {filename}")
+    except Exception as e:
+        print(f"❌ Error in background embedding task: {e}")
+
+
 @app.post("/api/artifacts/add")
 async def add_artifact(
     background_tasks: BackgroundTasks,
     name: str = Form(...),
+
     category: str = Form(...),
     period: str = Form(...),
     origin: str = Form(...),
@@ -202,21 +221,16 @@ async def add_artifact(
                     await loop.run_in_executor(None, lambda: filepath.write_bytes(contents))
                     print(f"   ✅ Saved document: {filename}")
                     
-                    # Create embeddings (HEAVY BLOCKING OPERATION)
+                    # Create embeddings (BACKGROUND TASK)
                     if RAG_ENABLED:
-                        print(f"   🔄 Generating embeddings for {filename}...")
-                        success = await loop.run_in_executor(
-                            None, 
-                            rag_service.create_embeddings,
+                        print(f"   ⏳ Scheduled background embedding generation for {filename}")
+                        background_tasks.add_task(
+                            run_embedding_task,
                             artifact_id,
                             str(filepath),
                             doc_id,
                             original_filename
                         )
-                        if success:
-                            print(f"   ✨ Embeddings created for {filename}")
-                        else:
-                            print(f"   ⚠️ Failed to create embeddings for {filename}")
                     
                     saved_documents.append({
                         "id": doc_id,

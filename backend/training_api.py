@@ -40,6 +40,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Disable caching for static files to prevent stale images
+@app.middleware("http")
+async def add_no_cache_header(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
+
 # Data directories
 DATA_DIR = Path(__file__).parent.parent / "data"
 TRAINING_DIR = DATA_DIR / "training"
@@ -153,16 +161,9 @@ async def add_artifact(
         # Load artifacts in threadpool to avoid blocking
         artifacts = await loop.run_in_executor(None, load_artifacts)
 
-        max_id = 0
-        for a in artifacts:
-            try:
-                if a['id'].startswith('artifact_'):
-                    aid = int(a['id'].split('_')[1])
-                    if aid > max_id:
-                        max_id = aid
-            except (ValueError, IndexError):
-                pass
-        artifact_id = f"artifact_{max_id + 1}"
+        # Generate unique artifact ID using timestamp
+        import time
+        artifact_id = f"artifact_{int(time.time())}"
         
         # Create directory for this artifact's images
         artifact_dir = TRAINING_DIR / artifact_id
@@ -393,12 +394,12 @@ async def delete_artifact(
         # Delete the training images directory
         artifact_dir = TRAINING_DIR / artifact_id
         if artifact_dir.exists():
-            shutil.rmtree(artifact_dir)
+            shutil.rmtree(artifact_dir, ignore_errors=True)
         
         # Delete documents and embeddings
         doc_dir = DOCUMENTS_DIR / artifact_id
         if doc_dir.exists():
-            shutil.rmtree(doc_dir)
+            shutil.rmtree(doc_dir, ignore_errors=True)
         
         if RAG_ENABLED:
             rag_service.delete_artifact_embeddings(artifact_id)

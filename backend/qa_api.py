@@ -91,6 +91,27 @@ async def get_artifact_stats(artifact_id: str):
         }, status_code=500)
 
 
+@app.get("/api/artifact/{artifact_id}/documents")
+async def list_artifact_documents(artifact_id: str):
+    """List all documents for an artifact"""
+    try:
+        documents = rag_service.list_documents(artifact_id)
+        
+        return JSONResponse({
+            "success": True,
+            "artifact_id": artifact_id,
+            "documents": documents,
+            "total": len(documents)
+        })
+    
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "documents": []
+        }, status_code=500)
+
+
 if __name__ == "__main__":
     import uvicorn
     print("""

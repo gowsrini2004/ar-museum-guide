@@ -94,12 +94,16 @@ class RAGService:
         
         return chunks
     
-    def create_embeddings(self, artifact_id: str, pdf_path: str, document_id: str) -> bool:
+    def create_embeddings(self, artifact_id: str, pdf_path: str, document_id: str, filename: str = None) -> bool:
         """
         Process PDF and create embeddings in ChromaDB
         Returns True if successful
         """
         try:
+            # Extract filename from path if not provided
+            if filename is None:
+                filename = Path(pdf_path).name
+            
             # Extract text from PDF
             pages = self.extract_text_from_pdf(pdf_path)
             if not pages:
@@ -130,6 +134,7 @@ class RAGService:
                     all_chunks.append(chunk)
                     all_metadatas.append({
                         'document_id': document_id,
+                        'filename': filename,
                         'page_number': page_num,
                         'chunk_index': chunk_idx,
                         'artifact_id': artifact_id
@@ -143,7 +148,7 @@ class RAGService:
                     metadatas=all_metadatas,
                     ids=all_ids
                 )
-                print(f"Added {len(all_chunks)} chunks to collection {collection_name}")
+                print(f"Added {len(all_chunks)} chunks for {filename} to collection {collection_name}")
                 return True
             
             return False
@@ -285,6 +290,78 @@ Answer:"""
             return collection.count()
         except Exception:
             return 0
+    
+    def list_documents(self, artifact_id: str) -> List[Dict]:
+        """List all documents for an artifact with metadata"""
+        try:
+            collection_name = f"artifact_{artifact_id}"
+            try:
+                collection = self.chroma_client.get_collection(name=collection_name)
+            except Exception:
+                # Collection doesn't exist, which is fine (no docs)
+                return []
+            
+            # Get all items in collection
+            results = collection.get()
+            
+            # Debug logging
+            print(f"Listing documents for {artifact_id}, found {len(results.get('ids', []))} chunks")
+            
+            metadatas = results.get('metadatas')
+            if not metadatas:
+                return []
+            
+            # Group by document_id
+            documents = {}
+            for metadata in metadatas:
+                if not metadata:
+                    continue
+                    
+                doc_id = metadata.get('document_id')
+                filename = metadata.get('filename', 'Unknown')
+                
+                if doc_id and doc_id not in documents:
+                    documents[doc_id] = {
+                        'document_id': doc_id,
+                        'filename': filename,
+                        'chunks': 0
+                    }
+                
+                if doc_id:
+                    documents[doc_id]['chunks'] += 1
+            
+            return list(documents.values())
+        except Exception as e:
+            print(f"Error listing documents: {e}")
+            return []
+    
+    def get_artifact_stats(self, artifact_id: str) -> Dict:
+        """Get detailed stats for an artifact"""
+        try:
+            collection_name = f"artifact_{artifact_id}"
+            collection = self.chroma_client.get_collection(name=collection_name)
+            
+            results = collection.get()
+            total_chunks = len(results.get('ids', []))
+            
+            # Count unique documents
+            document_ids = set()
+            for metadata in results.get('metadatas', []):
+                doc_id = metadata.get('document_id')
+                if doc_id:
+                    document_ids.add(doc_id)
+            
+            return {
+                'total_chunks': total_chunks,
+                'total_documents': len(document_ids),
+                'has_documents': len(document_ids) > 0
+            }
+        except Exception:
+            return {
+                'total_chunks': 0,
+                'total_documents': 0,
+                'has_documents': False
+            }
 
 
 # Singleton instance

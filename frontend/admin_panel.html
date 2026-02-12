@@ -13,13 +13,13 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -29,15 +29,53 @@
             padding: 30px;
             border-radius: 16px;
             margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .header h1 {
             font-size: 32px;
-            margin-bottom: 8px;
         }
 
-        .header p {
-            opacity: 0.9;
+        .header a {
+            background: white;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: white;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .card {
@@ -49,9 +87,192 @@
         }
 
         .card h2 {
-            font-size: 24px;
             margin-bottom: 20px;
             color: #333;
+        }
+
+        .artifact-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .artifact-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .artifact-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .artifact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .artifact-title {
+            flex: 1;
+        }
+
+        .artifact-title h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge.category {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge.period {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge.origin {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.images {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .artifact-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .expandable-content {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .expandable-content.show {
+            display: block;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-item .delete-img-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+        }
+
+        .image-item:hover .delete-img-btn {
+            display: block;
+        }
+
+        .document-list {
+            margin: 15px 0;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            margin: 15px 0;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
         }
 
         .form-group {
@@ -81,280 +302,39 @@
             resize: vertical;
         }
 
-        .file-upload-area {
-            border: 2px dashed #667eea;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            background: #f8f9ff;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-upload-area:hover {
-            background: #f0f2ff;
-            border-color: #5568d3;
-        }
-
-        .file-upload-area.dragover {
-            background: #e8ebff;
-            border-color: #4451b8;
-        }
-
-        .upload-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .file-input {
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
             display: none;
         }
 
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .preview-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 1;
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .artifact-list {
-            display: grid;
-            gap: 20px;
-        }
-
-        .artifact-item {
-            display: flex;
-            gap: 20px;
-            padding: 24px;
-            background: white;
-            border-radius: 16px;
-            align-items: flex-start;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .artifact-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-        }
-
-        .artifact-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            flex-shrink: 0;
-        }
-
-        .artifact-info {
-            flex: 1;
-        }
-
-        .artifact-info h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-            color: #333;
-        }
-
-        .artifact-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            background: #e3f2fd;
-            color: #1976d2;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .badge.image-count {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-
-        .badge.trained {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .badge.not-trained {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .artifact-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .btn-delete {
-            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-delete:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-        }
-
-        .training-status-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .training-status-badge.trained {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .training-status-badge.pending {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .status-message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .status-message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
+        .toast.show {
             display: block;
+            animation: slideIn 0.3s ease;
         }
 
-        .status-message.error {
-            background: #ffebee;
-            color: #c62828;
-            display: block;
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+
+            to {
+                transform: translateX(0);
+            }
         }
 
-        .training-section {
-            background: linear-gradient(135deg, #f8f9ff 0%, #fff5f8 100%);
-            padding: 30px;
-            border-radius: 16px;
-            text-align: center;
+        .toast.success {
+            border-left: 4px solid #4caf50;
         }
 
-        .training-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #666;
+        .toast.error {
+            border-left: 4px solid #f44336;
         }
 
         .modal {
@@ -365,7 +345,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            z-index: 999;
             align-items: center;
             justify-content: center;
         }
@@ -376,62 +356,106 @@
 
         .modal-content {
             background: white;
-            padding: 32px;
+            padding: 30px;
             border-radius: 16px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-content h3 {
-            margin-bottom: 16px;
-            color: #333;
-        }
-
-        .modal-content p {
-            margin-bottom: 24px;
-            color: #666;
-            line-height: 1.6;
         }
 
         .modal-actions {
             display: flex;
             gap: 12px;
             justify-content: flex-end;
+            margin-top: 20px;
         }
 
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+        .hidden {
+            display: none;
         }
 
-        .btn-secondary:hover {
-            background: #d0d0d0;
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
         }
 
-        .model-info {
-            background: #f8f9ff;
-            padding: 16px;
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff5f8 100%);
+            padding: 20px;
             border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
+            text-align: center;
         }
 
-        .model-info p {
-            margin: 4px 0;
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
             font-size: 14px;
-            color: #555;
+            color: #666;
         }
 
-        .model-info strong {
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .status-badge.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .status-badge.warning {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffe0b2;
+        }
+
+        .status-badge.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
             color: #333;
+        }
+
+        .metric-cw {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -439,104 +463,105 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏛️ AR Museum Guide - Admin Panel</h1>
-            <p>Manage artifacts and train the ML model</p>
+            <div>
+                <h1>🏛️ AR Museum Guide - Admin Panel</h1>
+                <p>Manage artifacts, images, documents, and train the model</p>
+            </div>
+            <a href="index.html">👁️ User View</a>
         </div>
 
-        <div id="status-message" class="status-message"></div>
-
-        <!-- Add New Artifact -->
-        <div class="card">
-            <h2>📸 Add New Artifact</h2>
-
-            <form id="artifact-form">
-                <div class="form-group">
-                    <label for="artifact-name">Artifact Name *</label>
-                    <input type="text" id="artifact-name" required placeholder="e.g., Ancient Greek Amphora">
-                </div>
-
-                <div class="form-group">
-                    <label for="category">Category *</label>
-                    <input type="text" id="category" required placeholder="e.g., Pottery, Jewelry, Ceramics">
-                </div>
-
-                <div class="form-group">
-                    <label for="period">Historical Period *</label>
-                    <input type="text" id="period" required placeholder="e.g., 500 BCE, 1450 CE">
-                </div>
-
-                <div class="form-group">
-                    <label for="origin">Origin *</label>
-                    <input type="text" id="origin" required placeholder="e.g., Athens, Greece">
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description *</label>
-                    <textarea id="description" required
-                        placeholder="Detailed description of the artifact..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="curator">Curator Name</label>
-                    <input type="text" id="curator" placeholder="e.g., Dr. Maria Konstantinou">
-                </div>
-
-                <div class="form-group">
-                    <label>Upload Photos (10-30 images recommended) *</label>
-                    <div class="file-upload-area" id="upload-area">
-                        <div class="upload-icon">📷</div>
-                        <p><strong>Click to upload</strong> or drag and drop</p>
-                        <p style="font-size: 12px; color: #666; margin-top: 8px;">
-                            Take photos from different angles for better recognition
-                        </p>
-                    </div>
-                    <input type="file" id="file-input" class="file-input" multiple accept="image/*">
-                </div>
-
-                <div id="image-preview" class="image-preview"></div>
-
-                <div class="form-group">
-                    <label>Upload PDF Documents (Optional) 📄</label>
-                    <div class="file-upload-area" id="pdf-upload-area"
-                        style="background: #fff9f0; border-color: #ff9800;">
-                        <div class="upload-icon">📄</div>
-                        <p><strong>Click to upload PDFs</strong> or drag and drop</p>
-                        <p style="font-size: 12px; color: #666; margin-top: 8px;">
-                            Upload historical documents, research papers, or curator notes
-                        </p>
-                    </div>
-                    <input type="file" id="pdf-input" class="file-input" multiple accept=".pdf">
-                    <div id="pdf-preview" style="margin-top: 12px;"></div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="submit-btn">
-                    ✅ Add Artifact
-                </button>
-            </form>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('artifacts')">📚 Artifacts</button>
+            <button class="tab" onclick="switchTab('add')">➕ Add New</button>
+            <button class="tab" onclick="switchTab('model')">🤖 Model</button>
         </div>
 
-        <!-- Existing Artifacts -->
-        <div class="card">
-            <h2>📚 Existing Artifacts</h2>
-            <div id="artifact-list" class="artifact-list">
-                <!-- Will be populated dynamically -->
+        <!-- Artifacts Tab -->
+        <div id="artifacts-tab" class="tab-content active">
+            <div class="card">
+                <h2>Manage Artifacts</h2>
+                <div id="artifacts-list" class="artifact-grid">
+                    <div class="loading">
+                        <p>Loading artifacts...</p>
+                        <p id="loading-status" style="font-size: 12px; margin-top: 10px; color: #999;">Connecting to
+                            API...</p>
+                        <button onclick="loadArtifacts()" class="btn btn-secondary" style="margin-top: 10px;">↻
+                            Retry</button>
+                    </div>
+                </div>
+                <div id="debug-info"
+                    style="margin-top: 20px; padding: 10px; background: #eee; border-radius: 8px; font-family: monospace; font-size: 12px; display: none;">
+                </div>
             </div>
         </div>
 
-        <!-- Training Section -->
-        <div class="card">
-            <div class="training-section">
-                <h2>🤖 Model Training</h2>
-                <p style="margin-bottom: 20px;">Train the ML model on your artifact images</p>
+        <!-- Add New Tab -->
+        <div id="add-tab" class="tab-content">
+            <div class="card">
+                <h2>Add New Artifact</h2>
+                <form id="add-artifact-form">
+                    <div class="form-group">
+                        <label>Artifact Name *</label>
+                        <input type="text" id="name" required placeholder="e.g., Ancient Greek Amphora">
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <input type="text" id="category" required placeholder="e.g., Pottery, Sculpture">
+                    </div>
+                    <div class="form-group">
+                        <label>Period *</label>
+                        <input type="text" id="period" required placeholder="e.g., 500 BCE">
+                    </div>
+                    <div class="form-group">
+                        <label>Origin *</label>
+                        <input type="text" id="origin" required placeholder="e.g., Athens, Greece">
+                    </div>
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea id="description" required placeholder="Detailed description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Curator Name</label>
+                        <input type="text" id="curator" placeholder="e.g., Dr. Maria Konstantinou">
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Images (10-30 recommended) *</label>
+                        <div class="upload-area" onclick="document.getElementById('images-input').click()">
+                            <p>📷 Click to upload images</p>
+                            <p style="font-size: 12px; color: #666; margin-top: 8px;">Take photos from different angles
+                            </p>
+                        </div>
+                        <input type="file" id="images-input" multiple accept="image/*" style="display: none;"
+                            onchange="previewImages(event)">
+                        <div id="images-preview" class="image-grid"></div>
+                    </div>
 
-                <div id="model-info" class="model-info" style="display: none;">
-                    <p><strong>Model Status:</strong> <span id="model-status-text">Not Trained</span></p>
-                    <p id="model-timestamp-text" style="display: none;"><strong>Last Trained:</strong> <span
-                            id="model-timestamp"></span></p>
-                    <p><strong>Artifacts in Model:</strong> <span id="model-artifact-count">0</span></p>
+                    <div class="form-group">
+                        <label>Upload Documents (PDF) - Optional</label>
+                        <div class="upload-area" onclick="document.getElementById('docs-input').click()">
+                            <p>📄 Click to upload PDFs</p>
+                            <p style="font-size: 12px; color: #666; margin-top: 8px;">For RAG Q&A context</p>
+                        </div>
+                        <input type="file" id="docs-input" multiple accept=".pdf" style="display: none;"
+                            onchange="previewDocuments(event)">
+                        <div id="docs-preview" class="document-list"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">✅ Add Artifact</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Model Tab -->
+        <div id="model-tab" class="tab-content">
+            <div class="card">
+                <h2>Model Training & Status</h2>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div id="training-status-badge" class="status-badge warning">Checking status...</div>
+                    <p id="training-message" style="margin-top: 10px; color: #666;"></p>
                 </div>
 
-                <div class="training-stats">
+                <div class="stat-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="total-artifacts">0</div>
                         <div class="stat-label">Total Artifacts</div>
@@ -546,419 +571,578 @@
                         <div class="stat-label">Training Images</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="model-status">Not Trained</div>
-                        <div class="stat-label">Model Status</div>
+                        <div class="stat-value" id="model-accuracy">--</div>
+                        <div class="stat-label">Model Accuracy</div>
                     </div>
                 </div>
 
-                <button class="btn btn-success" id="train-btn">
-                    🚀 Train Model
-                </button>
-            </div>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div id="delete-modal" class="modal">
-            <div class="modal-content">
-                <h3>⚠️ Delete Artifact?</h3>
-                <p id="delete-message">Are you sure you want to delete this artifact? This will remove all training
-                    images and cannot be undone.</p>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                    <button class="btn btn-delete" id="confirm-delete-btn">Delete</button>
+                <div id="advanced-metrics" class="metrics-grid" style="display: none;">
+                    <div class="metric-item">
+                        <div class="metric-value" id="last-trained">Never</div>
+                        <div class="metric-cw">Last Trained</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="metrics-epochs">--</div>
+                        <div class="metric-cw">Epochs</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="metrics-classes">--</div>
+                        <div class="metric-cw">Classes</div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Retrain Confirmation Modal -->
-        <div id="retrain-modal" class="modal">
-            <div class="modal-content">
-                <h3>🔄 Retrain Model?</h3>
-                <p id="retrain-message">This will retrain the model with the current artifacts. The process may take a
-                    few minutes.</p>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeRetrainModal()">Cancel</button>
-                    <button class="btn btn-success" id="confirm-retrain-btn">Retrain</button>
+                <div style="margin-top: 30px;">
+                    <button id="train-btn" class="btn btn-primary" onclick="trainModel()"
+                        style="width: 100%; padding: 20px; font-size: 18px;">🚀 Train Model</button>
+                    <p style="text-align: center; font-size: 12px; color: #999; margin-top: 10px;">Note: Training may
+                        take a few minutes. The page will update automatically when done.</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ Confirm Deletion</h3>
+            <p id="delete-message"></p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
     <script>
-        // Auto-detect the correct API URL based on how the page is accessed
-        // If accessed via IP (from phone), use that IP. If via localhost, use localhost.
-        const hostname = window.location.hostname;
-        const API_URL = `http://${hostname}:8000`;
-        const TRAINING_API_URL = `http://${hostname}:8001`;
-
-        console.log('API URLs configured:', { API_URL, TRAINING_API_URL });
-
-        let selectedFiles = [];
+        const API_BASE = `http://${window.location.hostname}:8001`;
         let artifacts = [];
+        let selectedImages = [];
+        let currentArtifact = null;
 
-        // File upload handling
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
-        const imagePreview = document.getElementById('image-preview');
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        pdfUploadArea.addEventListener('click', () => pdfInput.click());
+            const tabBtn = Array.from(document.querySelectorAll('.tab')).find(t => t.textContent.toLowerCase().includes(tab === 'add' ? 'add' : tab));
+            if (tabBtn) tabBtn.classList.add('active');
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+            const content = document.getElementById(`${tab}-tab`);
+            if (content) content.classList.add('active');
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
-
-        pdfInput.addEventListener('change', (e) => {
-            selectedPDFs = Array.from(e.target.files);
-            displayPDFPreviews();
-        });
-
-        function handleFiles(files) {
-            selectedFiles = [...selectedFiles, ...Array.from(files)];
-            displayImagePreviews();
+            // Load stats only when switching to Model tab (lazy loading)
+            if (tab === 'model') {
+                updateStats();
+            }
         }
 
-        function displayImagePreviews() {
-            imagePreview.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview">
-                        <button class="remove-btn" onclick="removeImage(${index})">×</button>
-                    `;
-                    imagePreview.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+        // Load artifacts
+        async function loadArtifacts() {
+            const container = document.getElementById('artifacts-list');
+            const statusEl = document.getElementById('loading-status');
+            const debugEl = document.getElementById('debug-info');
 
-        function removeImage(index) {
-            selectedFiles.splice(index, 1);
-            displayImagePreviews();
-        }
+            // Show debug info
+            debugEl.style.display = 'block';
+            debugEl.textContent = `Trying to connect to: ${API_BASE}/api/artifacts/list\nHost: ${window.location.hostname}`;
 
-        function displayPDFPreviews() {
-            pdfPreview.innerHTML = '';
-            if (selectedPDFs.length === 0) return;
+            try {
+                if (statusEl) statusEl.textContent = 'Fetching data...';
 
-            selectedPDFs.forEach((file, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = 'background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e0e0e0;';
-                div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 24px;">📄</span>
-                        <div>
-                            <div style="font-weight: 600; color: #333;">${file.name}</div>
-                            <div style="font-size: 12px; color: #666;">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                        </div>
+                const response = await fetch(`${API_BASE}/api/artifacts/list`);
+
+                debugEl.textContent += `\nResponse status: ${response.status}`;
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                debugEl.textContent += `\nData received: ${JSON.stringify(data).substring(0, 100)}...`;
+
+                artifacts = data.artifacts || [];
+                displayArtifacts();
+            } catch (error) {
+                console.error('Load Error:', error);
+                debugEl.textContent += `\nError: ${error.message}`;
+                showToast('Failed to load artifacts: ' + error.message, 'error');
+
+                container.innerHTML = `
+                    <div class="loading" style="color: #d32f2f;">
+                        <p>❌ Failed to load artifacts</p>
+                        <p style="font-size: 12px; margin-top: 5px;">${error.message}</p>
+                        <p style="font-size: 12px;">Check if the Training API (Port 8001) is running.</p>
+                        <button onclick="loadArtifacts()" class="btn btn-secondary" style="margin-top: 15px;">↻ Retry</button>
                     </div>
-                    <button type="button" class="remove-btn" onclick="removePDF(${index})" style="background: #ff5252; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1;">×</button>
                 `;
-                pdfPreview.appendChild(div);
-            });
+            }
         }
 
-        function removePDF(index) {
-            selectedPDFs.splice(index, 1);
-            displayPDFPreviews();
-        }
+        // Display artifacts
+        function displayArtifacts() {
+            const container = document.getElementById('artifacts-list');
 
-        // Form submission
-        document.getElementById('artifact-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (selectedFiles.length < 5) {
-                showStatus('Please upload at least 5 images for better recognition', 'error');
+            if (artifacts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No artifacts yet. Add your first artifact!</p>';
                 return;
             }
 
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Uploading...';
+            container.innerHTML = artifacts.map(artifact => `
+                <div class="artifact-card" id="artifact-${artifact.id}">
+                    <div class="artifact-header">
+                        <div class="artifact-title">
+                            <h3>${artifact.name}</h3>
+                            <div class="badges">
+                                <span class="badge category">${artifact.category}</span>
+                                <span class="badge period">${artifact.period}</span>
+                                <span class="badge origin">${artifact.origin}</span>
+                                <span class="badge images">📷 ${artifact.num_images || 0} images</span>
+                            </div>
+                            <p style="color: #666; margin-top: 8px;">${artifact.description.substring(0, 100)}...</p>
+                        </div>
+                        <div class="artifact-actions">
+                            <button class="btn btn-secondary" onclick="toggleExpand('${artifact.id}')">
+                                <span id="expand-icon-${artifact.id}">▼</span> Manage
+                            </button>
+                            <button class="btn btn-danger" onclick="confirmDeleteArtifact('${artifact.id}', '${artifact.name}')">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div id="expand-${artifact.id}" class="expandable-content">
+                        <h4>📷 Images (${artifact.num_images || 0})</h4>
+                        <div class="image-grid" id="images-${artifact.id}">
+                            <p style="color: #999; text-align: center;">Loading images...</p>
+                        </div>
+                        <div class="upload-area" onclick="document.getElementById('add-images-${artifact.id}').click()">
+                            <p>➕ Add More Images</p>
+                        </div>
+                        <input type="file" id="add-images-${artifact.id}" multiple accept="image/*" style="display: none;" onchange="addImages('${artifact.id}', event)">
+                        
+                        <h4 style="margin-top: 30px;">📄 Documents</h4>
+                        <div id="documents-${artifact.id}" class="document-list">
+                            <p style="color: #999; font-size: 14px;">Loading documents...</p>
+                        </div>
+                        <div class="upload-area" onclick="document.getElementById('add-docs-${artifact.id}').click()">
+                            <p>➕ Upload PDF Documents</p>
+                        </div>
+                        <input type="file" id="add-docs-${artifact.id}" multiple accept=".pdf" style="display: none;" onchange="addDocuments('${artifact.id}', event)">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle expand and load images/documents on demand
+        function toggleExpand(artifactId) {
+            const content = document.getElementById(`expand-${artifactId}`);
+            const icon = document.getElementById(`expand-icon-${artifactId}`);
+
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                icon.textContent = '▼';
+            } else {
+                content.classList.add('show');
+                icon.textContent = '▲';
+
+                // Load images and documents only when expanded
+                loadArtifactImages(artifactId);
+                loadDocuments(artifactId);
+            }
+        }
+
+        // Load images for a specific artifact
+        function loadArtifactImages(artifactId) {
+            const artifact = artifacts.find(a => a.id === artifactId);
+            if (!artifact) return;
+
+            const container = document.getElementById(`images-${artifactId}`);
+
+            if (!artifact.images || artifact.images.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">No images yet</p>';
+                return;
+            }
+
+            container.innerHTML = artifact.images.map((img, idx) => {
+                const filename = img.split('\\').pop();
+                return `
+                    <div class="image-item">
+                        <img src="${API_BASE}/static/training/${artifactId}/${filename}" alt="${filename}">
+                        <button class="delete-img-btn" onclick="deleteImage('${artifactId}', '${filename}')">×</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load documents
+        async function loadDocuments(artifactId) {
+            try {
+                const response = await fetch(`http://${window.location.hostname}:8002/api/artifact/${artifactId}/documents`);
+                const data = await response.json();
+
+                const container = document.getElementById(`documents-${artifactId}`);
+
+                if (data.documents && data.documents.length > 0) {
+                    container.innerHTML = data.documents.map(doc => `
+                        <div class="document-item">
+                            <div>
+                                <strong>📄 ${doc.filename}</strong>
+                                <div style="font-size: 12px; color: #666;">${doc.chunks} chunks</div>
+                            </div>
+                            <button class="btn btn-danger" onclick="deleteDocument('${artifactId}', '${doc.document_id}', '${doc.filename}')">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color: #999; font-size: 14px;">No documents uploaded yet</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load documents:', error);
+            }
+        }
+
+        // Add images to existing artifact
+        async function addImages(artifactId, event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            files.forEach(file => formData.append('images', file));
 
             try {
-                // Create FormData
-                const formData = new FormData();
-                formData.append('name', document.getElementById('artifact-name').value);
-                formData.append('category', document.getElementById('category').value);
-                formData.append('period', document.getElementById('period').value);
-                formData.append('origin', document.getElementById('origin').value);
-                formData.append('description', document.getElementById('description').value);
-                formData.append('curator', document.getElementById('curator').value || 'Museum Curator');
-
-                // Add all images
-                selectedFiles.forEach((file, index) => {
-                    formData.append('images', file);
+                showToast('Uploading images...', 'success');
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/images`, {
+                    method: 'POST',
+                    body: formData
                 });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Images added successfully!', 'success');
+                    event.target.value = ''; // Reset file input
+                    refreshArtifacts(); // Refresh to show updated image count
+                } else {
+                    showToast('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Failed to add images: ' + error.message, 'error');
+            }
+        }
 
-                // Upload to server
-                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/add`, {
+        // Delete image
+        async function deleteImage(artifactId, filename) {
+            if (!confirm(`Delete ${filename}?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/images/${filename}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Image deleted successfully!', 'success');
+                    refreshArtifacts(); // Refresh to show updated image count
+                } else {
+                    showToast('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Failed to delete image: ' + error.message, 'error');
+            }
+        }
+
+        // Add documents
+        async function addDocuments(artifactId, event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            files.forEach(file => formData.append('documents', file));
+
+            try {
+                showToast('Uploading and processing documents...', 'info');
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/documents`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Documents uploaded and processed!', 'success');
+                    event.target.value = ''; // Reset file input
+                    loadDocuments(artifactId);
+                    refreshArtifacts(); // Refresh to show updates
+                } else {
+                    showToast('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Failed to upload documents: ' + error.message, 'error');
+            }
+        }
+
+        // Delete document
+        async function deleteDocument(artifactId, documentId, filename) {
+            if (!confirm(`Delete ${filename}? This will also remove all embeddings.`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/documents/${documentId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Document deleted successfully!', 'success');
+                    loadDocuments(artifactId); // Reload documents list
+                    refreshArtifacts(); // Refresh to show updates
+                } else {
+                    showToast('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('❌ Failed to delete document: ' + error.message, 'error');
+            }
+        }
+
+        // Delete artifact
+        function confirmDeleteArtifact(id, name) {
+            currentArtifact = { id, name };
+            document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This will remove all images, documents, and embeddings.`;
+            document.getElementById('delete-modal').classList.add('show');
+
+            document.getElementById('confirm-delete-btn').onclick = async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/artifacts/${id}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast('Artifact deleted successfully!', 'success');
+                        closeModal('delete-modal');
+                        refreshArtifacts(); // Refresh the list
+                    } else {
+                        showToast('❌ ' + result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('❌ Failed to delete: ' + error.message, 'error');
+                }
+            };
+        }
+
+
+        // Add new artifact
+        document.getElementById('add-artifact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (selectedImages.length < 5) {
+                showToast('Please upload at least 5 images', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('period', document.getElementById('period').value);
+            formData.append('origin', document.getElementById('origin').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('curator', document.getElementById('curator').value || 'Museum Curator');
+
+            selectedImages.forEach(file => formData.append('images', file));
+            selectedDocuments.forEach(file => formData.append('documents', file));
+
+            try {
+                showToast('Adding artifact and processing files...', 'info');
+                const response = await fetch(`${API_BASE}/api/artifacts/add`, {
                     method: 'POST',
                     body: formData
                 });
 
                 const result = await response.json();
-
                 if (result.success) {
-                    showStatus(`✅ ${result.message}`, 'success');
-
-                    // Reset form
-                    document.getElementById('artifact-form').reset();
-                    selectedFiles = [];
-                    selectedPDFs = [];
-                    imagePreview.innerHTML = '';
-                    pdfPreview.innerHTML = '';
-
-                    // Reload artifacts list
-                    await loadArtifacts();
-                    updateStats();
+                    showToast('Artifact added successfully!', 'success');
+                    document.getElementById('add-artifact-form').reset();
+                    document.getElementById('images-preview').innerHTML = '';
+                    document.getElementById('docs-preview').innerHTML = '';
+                    selectedImages = [];
+                    selectedDocuments = [];
+                    refreshArtifacts();
+                    switchTab('artifacts');
                 } else {
-                    showStatus(`❌ Error: ${result.message}`, 'error');
+                    showToast('❌ ' + result.message, 'error');
                 }
             } catch (error) {
-                showStatus(`❌ Upload failed: ${error.message}`, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '✅ Add Artifact';
+                showToast('❌ Failed to add artifact: ' + error.message, 'error');
             }
         });
 
-        // IndexedDB for storing images
-        async function saveImagesToIndexedDB(artifactId, files) {
-            return new Promise((resolve) => {
-                const request = indexedDB.open('ArtifactDB', 1);
+        // Preview images
+        function previewImages(event) {
+            // Append new files to existing selectedImages
+            const newFiles = Array.from(event.target.files);
+            selectedImages = [...selectedImages, ...newFiles];
+            updateImagePreview();
+        }
 
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('images')) {
-                        db.createObjectStore('images', { keyPath: 'id', autoIncrement: true });
-                    }
+        function updateImagePreview() {
+            const container = document.getElementById('images-preview');
+            container.innerHTML = '';
+
+            selectedImages.forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button class="delete-img-btn" onclick="removePreviewImage(${idx})" style="display: block;">×</button>
+                    `;
+                    container.appendChild(div);
                 };
-
-                request.onsuccess = async (e) => {
-                    const db = e.target.result;
-                    const transaction = db.transaction(['images'], 'readwrite');
-                    const store = transaction.objectStore('images');
-
-                    for (const file of files) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            store.add({
-                                artifactId: artifactId,
-                                data: event.target.result,
-                                filename: file.name
-                            });
-                        };
-                        reader.readAsDataURL(file);
-                    }
-
-                    transaction.oncomplete = () => resolve();
-                };
+                reader.readAsDataURL(file);
             });
         }
 
-        // Load and display artifacts
-        async function loadArtifacts() {
-            try {
-                const response = await fetch(`${TRAINING_API_URL}/api/stats`);
-                const data = await response.json();
-                artifacts = data.artifacts || [];
+        function removePreviewImage(idx) {
+            selectedImages.splice(idx, 1);
+            updateImagePreview();
+        }
 
-                // Update model info
-                updateModelInfo(data);
-            } catch (error) {
-                console.error('Failed to load artifacts:', error);
-                artifacts = [];
-            }
+        // Preview Documents
+        function previewDocuments(event) {
+            const newFiles = Array.from(event.target.files);
+            selectedDocuments = [...selectedDocuments, ...newFiles];
+            updateDocumentPreview();
+        }
 
-            const listEl = document.getElementById('artifact-list');
+        function updateDocumentPreview() {
+            const container = document.getElementById('docs-preview');
+            container.innerHTML = '';
 
-            if (artifacts.length === 0) {
-                listEl.innerHTML = '<p style="text-align: center; color: #999;">No artifacts added yet</p>';
-                return;
-            }
-
-            listEl.innerHTML = artifacts.map(artifact => {
-                const isTrained = artifact.has_images !== false;
-                const statusBadge = isTrained
-                    ? '<div class="training-status-badge trained">✅ Ready</div>'
-                    : '<div class="training-status-badge pending">⚠️ Pending</div>';
-
-                return `
-                <div class="artifact-item">
-                    ${statusBadge}
-                    <div class="artifact-icon">📸</div>
-                    <div class="artifact-info">
-                        <h3>${artifact.name}</h3>
-                        <div class="artifact-meta">
-                            <span class="badge">${artifact.category}</span>
-                            <span class="badge">${artifact.period}</span>
-                            <span class="badge">${artifact.origin}</span>
-                            <span class="badge image-count">📷 ${artifact.num_images || 0} images</span>
-                        </div>
-                        <p style="color: #666; margin-bottom: 8px;">${artifact.description.substring(0, 120)}${artifact.description.length > 120 ? '...' : ''}</p>
-                        <div class="artifact-actions">
-                            <button class="btn-delete" onclick="confirmDelete('${artifact.id}', '${artifact.name}')">
-                                🗑️ Delete
-                            </button>
-                        </div>
+            selectedDocuments.forEach((file, idx) => {
+                const div = document.createElement('div');
+                div.className = 'document-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>📄 ${file.name}</strong>
+                        <div style="font-size: 12px; color: #666;">${(file.size / 1024).toFixed(1)} KB</div>
                     </div>
-                </div>
-            `}).join('');
+                    <button class="btn btn-danger" onclick="removePreviewDocument(${idx})" style="padding: 5px 10px; font-size: 12px;">X</button>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        function updateModelInfo(data) {
-            const modelInfoEl = document.getElementById('model-info');
-            const modelStatusText = document.getElementById('model-status-text');
-            const modelTimestampText = document.getElementById('model-timestamp-text');
-            const modelTimestamp = document.getElementById('model-timestamp');
-            const modelArtifactCount = document.getElementById('model-artifact-count');
-
-            if (data.model_trained) {
-                modelInfoEl.style.display = 'block';
-                modelStatusText.textContent = 'Trained ✅';
-                modelArtifactCount.textContent = data.total_artifacts;
-
-                if (data.model_timestamp) {
-                    const date = new Date(data.model_timestamp * 1000);
-                    modelTimestamp.textContent = date.toLocaleString();
-                    modelTimestampText.style.display = 'block';
-                }
-            } else {
-                modelInfoEl.style.display = 'none';
-            }
+        function removePreviewDocument(idx) {
+            selectedDocuments.splice(idx, 1);
+            updateDocumentPreview();
         }
 
-        // Delete artifact functionality
-        let artifactToDelete = null;
-
-        function confirmDelete(artifactId, artifactName) {
-            artifactToDelete = artifactId;
-            document.getElementById('delete-message').textContent =
-                `Are you sure you want to delete "${artifactName}"? This will remove all ${artifacts.find(a => a.id === artifactId)?.num_images || 0} training images and cannot be undone.`;
-            document.getElementById('delete-modal').classList.add('show');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('delete-modal').classList.remove('show');
-            artifactToDelete = null;
-        }
-
-        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-            if (!artifactToDelete) return;
-
-            const btn = document.getElementById('confirm-delete-btn');
-            btn.disabled = true;
-            btn.textContent = 'Deleting...';
-
-            try {
-                const response = await fetch(`${TRAINING_API_URL}/api/artifacts/${artifactToDelete}`, {
-                    method: 'DELETE'
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    showStatus(`✅ ${result.message}`, 'success');
-                    closeDeleteModal();
-                    await loadArtifacts();
-                    updateStats();
-                } else {
-                    showStatus(`❌ Error: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`❌ Delete failed: ${error.message}`, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Delete';
-            }
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('delete-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'delete-modal') {
-                closeDeleteModal();
-            }
-        });
-
-        document.getElementById('retrain-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'retrain-modal') {
-                closeRetrainModal();
-            }
-        });
-
-        function updateStats() {
-            document.getElementById('total-artifacts').textContent = artifacts.length;
-            const totalImages = artifacts.reduce((sum, a) => sum + (a.num_images || 0), 0);
-            document.getElementById('total-images').textContent = totalImages;
-        }
-
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('status-message');
-            statusEl.textContent = message;
-            statusEl.className = `status-message ${type}`;
-            setTimeout(() => {
-                statusEl.className = 'status-message';
-            }, 5000);
-        }
-
-        // Train model button
-        document.getElementById('train-btn').addEventListener('click', async () => {
-            if (artifacts.length < 2) {
-                showStatus('Please add at least 2 artifacts before training', 'error');
-                return;
-            }
+        // Train model
+        async function trainModel() {
+            if (!confirm('Train the model with current artifacts? This may take a few minutes.')) return;
 
             const btn = document.getElementById('train-btn');
+            const debugEl = document.getElementById('debug-info');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Training in progress...';
             btn.disabled = true;
-            btn.textContent = '🔄 Training... (this may take a few minutes)';
+
+            // Show debug info
+            if (debugEl) {
+                debugEl.style.display = 'block';
+                debugEl.textContent = `Starting training...\nEndpoint: ${API_BASE}/api/model/train`;
+            }
 
             try {
-                const response = await fetch(`${TRAINING_API_URL}/api/model/train`, {
-                    method: 'POST'
-                });
+                showToast('Training started...', 'info');
+
+                // FIXED: Correct endpoint is /api/model/train
+                const response = await fetch(`${API_BASE}/api/model/train`, { method: 'POST' });
+
+                if (debugEl) debugEl.textContent += `\nResponse status: ${response.status}`;
+
                 const result = await response.json();
 
+                if (debugEl) debugEl.textContent += `\nResult: ${JSON.stringify(result).substring(0, 100)}...`;
+
                 if (result.success) {
-                    document.getElementById('model-status').textContent = 'Trained ✅';
-                    showStatus('✅ Model trained successfully! You can now use it for predictions.', 'success');
-                    // Reload artifacts to update model info
-                    await loadArtifacts();
+                    showToast('Model trained successfully!', 'success');
+                    updateStats();
                 } else {
-                    showStatus(`❌ Training failed: ${result.message}`, 'error');
+                    showToast('❌ Training failed: ' + result.message, 'error');
                 }
             } catch (error) {
-                showStatus(`❌ Training failed: ${error.message}`, 'error');
+                console.error('Training Error:', error);
+                if (debugEl) debugEl.textContent += `\nError: ${error.message}`;
+                showToast('❌ Training failed: ' + error.message, 'error');
             } finally {
+                btn.innerHTML = originalText;
                 btn.disabled = false;
-                btn.textContent = '🚀 Train Model';
             }
-        });
-
-        function closeRetrainModal() {
-            document.getElementById('retrain-modal').classList.remove('show');
         }
 
-        // Initialize
+        // Update stats
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const data = await response.json();
+
+                // Basic stats
+                document.getElementById('total-artifacts').textContent = data.total_artifacts || 0;
+                document.getElementById('total-images').textContent = data.total_images || 0;
+
+                // Model status logic
+                const statusBadge = document.getElementById('training-status-badge');
+                const statusMsg = document.getElementById('training-message');
+                const advancedMetrics = document.getElementById('advanced-metrics');
+
+                if (data.model_trained) {
+                    // Check if retraining is needed
+                    if (data.needs_retraining) {
+                        statusBadge.className = 'status-badge warning';
+                        statusBadge.innerHTML = '⚠️ Needs Retraining';
+                        statusMsg.textContent = 'New artifacts have been added or modified since the last training.';
+                    } else {
+                        statusBadge.className = 'status-badge success';
+                        statusBadge.innerHTML = '✅ Model Up to Date';
+                        statusMsg.textContent = 'The model is trained and ready for recognition.';
+                    }
+
+                    // Update metrics
+                    document.getElementById('model-accuracy').textContent = data.last_training_accuracy ? data.last_training_accuracy.toFixed(1) + '%' : 'N/A';
+                    document.getElementById('last-trained').textContent = data.model_timestamp ? new Date(data.model_timestamp * 1000).toLocaleDateString() : 'N/A';
+                    document.getElementById('metrics-epochs').textContent = data.training_epochs || 10;
+                    document.getElementById('metrics-classes').textContent = data.total_artifacts;
+
+                    advancedMetrics.style.display = 'grid';
+                } else {
+                    statusBadge.className = 'status-badge error';
+                    statusBadge.innerHTML = '❌ Not Trained';
+                    statusMsg.textContent = 'Please train the model to enable artifact recognition.';
+                    document.getElementById('model-accuracy').textContent = '--';
+                    advancedMetrics.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Close modal
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Refresh artifact list after updates
+        function refreshArtifacts() {
+            loadArtifacts();
+        }
+
+        // Initialize - only load artifact list (lazy loading)
         loadArtifacts();
-        updateStats();
+        // Stats are loaded only when switching to Model tab
     </script>
 </body>
 

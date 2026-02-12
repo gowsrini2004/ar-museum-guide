@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Museum Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: #f5f5f5;
+            padding: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-radius: 10px;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .scan-interface {
+            text-align: center;
+        }
+
+        #video-container {
+            position: relative;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #camera-feed {
+            width: 100%;
+            display: block;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 60%;
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-zone.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .results-section {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .artifact-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .artifact-card h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .artifact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .info-item value {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: width 1s ease;
+        }
+
+        .qa-section {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .qa-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .qa-header h3 {
+            flex: 1;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .qa-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .qa-status.available {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .qa-status.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .chat-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.assistant {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .message.assistant .sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .question-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .question-input-area input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .question-input-area input:focus {
+            border-color: #667eea;
+        }
+
+        .suggested-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .suggested-q {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .suggested-q:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .admin-link {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            color: #667eea;
+            padding: 15px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .admin-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .artifact-info {
+                grid-template-columns: 1fr;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ AR Museum Guide</h1>
+            <p>Discover artifacts with AI-powered recognition and Q&A</p>
+        </header>
+
+        <div class="main-card">
+            <!-- Mode selector removed for single-view experience -->
+
+            <div class="content-area">
+                <!-- Camera Mode -->
+                <div id="camera-mode" class="scan-interface">
+                    <div id="video-container" class="hidden">
+                        <video id="camera-feed" autoplay playsinline></video>
+                        <div class="camera-overlay"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
+                    <button class="btn btn-primary hidden" id="capture-btn" onclick="captureImage()">Capture &
+                        Recognize</button>
+                    <button class="btn btn-secondary hidden" id="stop-camera-btn" onclick="stopCamera()">Stop
+                        Camera</button>
+                </div>
+
+
+
+                <!-- Loading State -->
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Analyzing artifact...</p>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results" class="results-section">
+                    <div class="artifact-card" id="artifact-card">
+                        <h2 id="artifact-name">Artifact Name</h2>
+                        <div class="artifact-info">
+                            <div class="info-item">
+                                <label>Category</label>
+                                <value id="artifact-category">-</value>
+                            </div>
+                            <div class="info-item">
+                                <label>Period</label>
+                                <value id="artifact-period">-</value>
+                            </div>
+                            <div class="info-item">
+                                <label>Origin</label>
+                                <value id="artifact-origin">-</value>
+                            </div>
+                        </div>
+                        <p id="artifact-description" style="margin-top: 20px; line-height: 1.6;"></p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill" style="width: 0%">
+                                <span id="confidence-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Section -->
+                    <div class="qa-section" id="documents-section"
+                        style="margin-top: 20px; background: white; border: 1px solid #eee;">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">📄 Related Documents</h3>
+                        <div id="documents-list" style="display: grid; gap: 10px;">
+                            <p style="color: #666; text-align: center;">Loading documents...</p>
+                        </div>
+                    </div>
+
+                    <!-- Q&A Section -->
+                    <div class="qa-section" id="qa-section">
+                        <div class="qa-header">
+                            <h3>💬 Ask Questions</h3>
+                            <span class="qa-status" id="qa-status">Checking...</span>
+                        </div>
+
+                        <div id="qa-available-content" class="hidden">
+                            <div class="suggested-questions" id="suggested-questions"></div>
+
+                            <div class="chat-container" id="chat-container"></div>
+
+                            <div class="question-input-area">
+                                <input type="text" id="question-input"
+                                    placeholder="Ask a question about this artifact..."
+                                    onkeypress="handleQuestionKeyPress(event)">
+                                <button class="btn btn-primary" onclick="askQuestion()">Ask</button>
+                            </div>
+                        </div>
+
+                        <div id="qa-unavailable-content" class="hidden">
+                            <p style="text-align: center; color: #666;">
+                                No documents available for this artifact. Upload PDFs in the admin panel to enable Q&A.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="resetScan()">Scan Another Artifact</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="admin_panel.html" class="admin-link">⚙️ Admin Panel</a>
+
+    <script>
+        let stream = null;
+        let currentArtifact = null;
+        const API_BASE = 'http://localhost:8000';
+        const QA_API_BASE = 'http://localhost:8002';
+
+        const TRAINING_API_BASE = 'http://localhost:8001';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            startCamera();
+        });
+
+        // Camera functions
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                const video = document.getElementById('camera-feed');
+                video.srcObject = stream;
+
+                document.getElementById('video-container').classList.remove('hidden');
+                document.getElementById('capture-btn').classList.remove('hidden');
+                document.getElementById('stop-camera-btn').classList.remove('hidden');
+                event.target.classList.add('hidden');
+            } catch (error) {
+                alert('Camera access denied or not available: ' + error.message);
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                document.getElementById('video-container').classList.add('hidden');
+                document.getElementById('capture-btn').classList.add('hidden');
+                document.getElementById('stop-camera-btn').classList.add('hidden');
+                document.querySelector('#camera-mode .btn-primary').classList.remove('hidden');
+            }
+        }
+
+        function captureImage() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            canvas.toBlob(blob => {
+                recognizeArtifact(blob);
+            }, 'image/jpeg', 0.95);
+        }
+
+
+
+        // Recognition
+        async function recognizeArtifact(imageBlob) {
+            // Hide scan interfaces
+            // Hide camera
+            document.getElementById('camera-mode').classList.add('hidden');
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loading').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', imageBlob);
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Recognition failed: ' + data.message);
+                    resetScan();
+                }
+            } catch (error) {
+                document.getElementById('loading').classList.add('hidden');
+                alert('Error: ' + error.message);
+                resetScan();
+            }
+        }
+
+        function displayResults(data) {
+            currentArtifact = data.prediction;
+
+            // Display artifact info
+            document.getElementById('artifact-name').textContent = data.prediction.artifact_name;
+            document.getElementById('artifact-category').textContent = data.prediction.category;
+            document.getElementById('artifact-period').textContent = data.prediction.period;
+            document.getElementById('artifact-origin').textContent = data.prediction.origin;
+            document.getElementById('artifact-description').textContent = data.prediction.description;
+
+            // Animate confidence bar
+            const confidence = Math.round(data.prediction.confidence * 100);
+            setTimeout(() => {
+                document.getElementById('confidence-fill').style.width = confidence + '%';
+                document.getElementById('confidence-text').textContent = confidence + '% Confident';
+            }, 100);
+
+            // Check Q&A availability
+            checkQAAvailability(data.prediction.artifact_id);
+
+            // Load Documents
+            loadArtifactDocuments(data.prediction.artifact_id);
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        async function loadArtifactDocuments(artifactId) {
+            const container = document.getElementById('documents-list');
+            container.innerHTML = '<p style="color: #666; text-align: center;">Checking for documents...</p>';
+
+            try {
+                // Fetch full artifact details from Training API to get document list/paths
+                const response = await fetch(`${TRAINING_API_BASE}/api/artifacts/${artifactId}`);
+                const data = await response.json();
+
+                if (data.success && data.artifact.documents && data.artifact.documents.length > 0) {
+                    container.innerHTML = data.artifact.documents.map(doc => `
+                        <div class="document-item" style="display: flex; align-items: center; padding: 10px; background: #f8f9ff; border-radius: 10px; border: 1px solid #e0e7ff;">
+                            <span style="font-size: 24px; margin-right: 15px;">📄</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #333;">${doc.filename}</div>
+                                <div style="font-size: 12px; color: #666;">PDF Document</div>
+                            </div>
+                            <a href="${TRAINING_API_BASE}/static/documents/${artifactId}/${doc.filename}" 
+                               target="_blank" 
+                               class="btn btn-secondary" 
+                               style="padding: 8px 15px; font-size: 14px; margin: 0; text-decoration: none;">
+                                Open ↗
+                            </a>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color: #999; text-align: center; font-style: italic;">No related documents found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                container.innerHTML = '<p style="color: #d32f2f; text-align: center;">Failed to load documents.</p>';
+            }
+        }
+
+        async function checkQAAvailability(artifactId) {
+            try {
+                const response = await fetch(`${QA_API_BASE}/api/artifact/${artifactId}/stats`);
+                const data = await response.json();
+
+                if (data.has_documents && data.total_chunks > 0) {
+                    document.getElementById('qa-status').textContent = `${data.total_chunks} chunks available`;
+                    document.getElementById('qa-status').className = 'qa-status available';
+                    document.getElementById('qa-available-content').classList.remove('hidden');
+                    document.getElementById('qa-unavailable-content').classList.add('hidden');
+
+                    // Show suggested questions
+                    showSuggestedQuestions();
+                } else {
+                    document.getElementById('qa-status').textContent = 'No documents';
+                    document.getElementById('qa-status').className = 'qa-status unavailable';
+                    document.getElementById('qa-available-content').classList.add('hidden');
+                    document.getElementById('qa-unavailable-content').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error checking Q&A availability:', error);
+                document.getElementById('qa-status').textContent = 'Unavailable';
+                document.getElementById('qa-status').className = 'qa-status unavailable';
+            }
+        }
+
+        function showSuggestedQuestions() {
+            const questions = [
+                "What is the historical significance of this artifact?",
+                "When was this created?",
+                "What materials were used?",
+                "Tell me more about its origin"
+            ];
+
+            const container = document.getElementById('suggested-questions');
+            container.innerHTML = '';
+
+            questions.forEach(q => {
+                const btn = document.createElement('button');
+                btn.className = 'suggested-q';
+                btn.textContent = q;
+                btn.onclick = () => {
+                    document.getElementById('question-input').value = q;
+                    askQuestion();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function handleQuestionKeyPress(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        }
+
+        async function askQuestion() {
+            const input = document.getElementById('question-input');
+            const question = input.value.trim();
+
+            if (!question) return;
+
+            // Add user message
+            addMessage(question, 'user');
+            input.value = '';
+
+            // Add loading message
+            const loadingMsg = addMessage('Thinking...', 'assistant');
+
+            try {
+                const response = await fetch(`${QA_API_BASE}/api/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        artifact_id: currentArtifact.artifact_id,
+                        artifact_name: currentArtifact.artifact_name,
+                        question: question
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove loading message
+                loadingMsg.remove();
+
+                // Add assistant response
+                if (data.success) {
+                    const sources = data.sources.map(s => `Page ${s.page}`).join(', ');
+                    addMessage(data.answer, 'assistant', sources ? `Sources: ${sources}` : null);
+                } else {
+                    addMessage('Sorry, I couldn\'t answer that question.', 'assistant');
+                }
+            } catch (error) {
+                loadingMsg.remove();
+                addMessage('Error: ' + error.message, 'assistant');
+            }
+        }
+
+        function addMessage(text, type, sources = null) {
+            const container = document.getElementById('chat-container');
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.innerHTML = text;
+
+            if (sources) {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'sources';
+                sourcesDiv.textContent = sources;
+                msg.appendChild(sourcesDiv);
+            }
+
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+            return msg;
+        }
+
+        function resetScan() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('camera-mode').classList.remove('hidden');
+            document.getElementById('chat-container').innerHTML = '';
+            document.getElementById('confidence-fill').style.width = '0%';
+            currentArtifact = null;
+        }
+    </script>
+</body>
+
+</html>

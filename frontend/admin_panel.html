@@ -594,11 +594,13 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 30px;">
+                <div id="model-actions" style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
                     <button id="train-btn" class="btn btn-primary" onclick="trainModel()"
                         style="width: 100%; padding: 20px; font-size: 18px;">🚀 Train Model</button>
+                    <button id="delete-model-btn" class="btn btn-danger" onclick="deleteModel()"
+                        style="width: 100%; padding: 15px; font-size: 16px; display: none;">🗑️ Delete Model</button>
                     <p style="text-align: center; font-size: 12px; color: #999; margin-top: 10px;">Note: Training may
-                        take a few minutes. The page will update automatically when done.</p>
+                        take several minutes depending on the number of artifacts.</p>
                 </div>
             </div>
         </div>
@@ -619,9 +621,7 @@
         </div>
     </div>
     <script>
-        const PROTOCOL = window.location.protocol;
-        const HOSTNAME = window.location.hostname;
-        const API_BASE = `${PROTOCOL}//${HOSTNAME}:8001`;
+        const API_BASE = `http://${window.location.hostname}:8001`;
         let artifacts = [];
         let selectedImages = [];
         let selectedDocuments = [];
@@ -1120,6 +1120,37 @@
             }
         }
 
+        // Delete model
+        async function deleteModel() {
+            if (!confirm('Are you sure you want to delete the trained model? This will disable artifact recognition until you retrain.')) return;
+
+            const btn = document.getElementById('delete-model-btn');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.innerHTML = '⏳ Deleting...';
+                btn.disabled = true;
+
+                const response = await fetch(`${API_BASE}/api/model`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Model deleted successfully!', 'success');
+                    updateStats();
+                } else {
+                    showToast('❌ Deletion failed: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Deletion Error:', error);
+                showToast('❌ Deletion failed: ' + error.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         // Update stats
         async function updateStats() {
             try {
@@ -1136,6 +1167,9 @@
                 const advancedMetrics = document.getElementById('advanced-metrics');
 
                 if (data.model_trained) {
+                    document.getElementById('train-btn').innerHTML = '🔄 Retrain Model';
+                    document.getElementById('delete-model-btn').style.display = 'block';
+
                     // Check if retraining is needed
                     if (data.needs_retraining) {
                         statusBadge.className = 'status-badge warning';
@@ -1146,21 +1180,22 @@
                         statusBadge.innerHTML = '✅ Model Up to Date';
                         statusMsg.textContent = 'The model is trained and ready for recognition.';
                     }
-
-                    // Update metrics
-                    document.getElementById('model-accuracy').textContent = data.last_training_accuracy ? data.last_training_accuracy.toFixed(1) + '%' : 'N/A';
-                    document.getElementById('last-trained').textContent = data.model_timestamp ? new Date(data.model_timestamp * 1000).toLocaleDateString() : 'N/A';
-                    document.getElementById('metrics-epochs').textContent = data.training_epochs || 10;
-                    document.getElementById('metrics-classes').textContent = data.total_artifacts;
-
-                    advancedMetrics.style.display = 'grid';
                 } else {
-                    statusBadge.className = 'status-badge error';
+                    document.getElementById('train-btn').innerHTML = '🚀 Train Model';
+                    document.getElementById('delete-model-btn').style.display = 'none';
+
+                    statusBadge.className = 'status-badge warning';
                     statusBadge.innerHTML = '❌ Not Trained';
-                    statusMsg.textContent = 'Please train the model to enable artifact recognition.';
-                    document.getElementById('model-accuracy').textContent = '--';
-                    advancedMetrics.style.display = 'none';
+                    statusMsg.textContent = 'No model trained yet. Add artifacts and click Train to start.';
                 }
+
+                // Update metrics
+                document.getElementById('model-accuracy').textContent = data.last_training_accuracy ? data.last_training_accuracy.toFixed(1) + '%' : 'N/A';
+                document.getElementById('last-trained').textContent = data.model_timestamp ? new Date(data.model_timestamp * 1000).toLocaleDateString() : 'N/A';
+                document.getElementById('metrics-epochs').textContent = data.training_epochs || 10;
+                document.getElementById('metrics-classes').textContent = data.total_artifacts;
+
+                advancedMetrics.style.display = 'grid';
             } catch (error) {
                 console.error('Failed to update stats:', error);
             }

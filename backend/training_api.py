@@ -48,17 +48,21 @@ async def add_no_cache_header(request, call_next):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return response
 
-# Data directories
+# Data and Model directories
 DATA_DIR = Path(__file__).parent.parent / "data"
 TRAINING_DIR = DATA_DIR / "training"
 DOCUMENTS_DIR = DATA_DIR / "documents"
 ARTIFACTS_FILE = DATA_DIR / "artifacts.json"
 STATS_FILE = DATA_DIR / "training_stats.json"
+MODEL_DIR = Path(__file__).parent.parent / "models"
+MODEL_PATH = MODEL_DIR / "artifact_model.pth"
+CLASS_MAPPING_PATH = MODEL_DIR / "class_mapping.json"
 
 # Create directories
 TRAINING_DIR.mkdir(parents=True, exist_ok=True)
 DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 # Mount static files to serve images and documents
 app.mount("/static/training", StaticFiles(directory=str(TRAINING_DIR)), name="training_images")
@@ -362,6 +366,27 @@ async def train_model(background_tasks: BackgroundTasks):
         return JSONResponse({
             "success": False,
             "message": f"Training failed: {str(e)}"
+        }, status_code=500)
+
+
+@app.delete("/api/model")
+async def delete_model():
+    """Delete the trained model and its statistics"""
+    try:
+        deleted_files = []
+        for file_path in [MODEL_PATH, CLASS_MAPPING_PATH, STATS_FILE]:
+            if file_path.exists():
+                file_path.unlink()
+                deleted_files.append(file_path.name)
+        
+        return JSONResponse({
+            "success": True,
+            "message": f"Successfully deleted model files: {', '.join(deleted_files) if deleted_files else 'None'}"
+        })
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "message": f"Error deleting model: {str(e)}"
         }, status_code=500)
 
 
@@ -770,13 +795,12 @@ async def get_stats():
     artifacts = load_artifacts()
     total_images = sum(a.get('num_images', 0) for a in artifacts)
     
-    model_path = Path(__file__).parent.parent / "models" / "artifact_model.pth"
-    model_trained = model_path.exists()
+    model_trained = MODEL_PATH.exists()
     
     # Get model training timestamp if available
     model_timestamp = None
     if model_trained:
-        model_timestamp = os.path.getmtime(model_path)
+        model_timestamp = os.path.getmtime(MODEL_PATH)
     
     # Load detailed stats
     training_stats = {}

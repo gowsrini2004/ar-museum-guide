@@ -434,17 +434,41 @@
             <!-- Mode selector removed for single-view experience -->
 
             <div class="content-area">
+                <!-- System Stats -->
+                <div id="system-stats" class="stats-container" style="margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-artifacts">-</div>
+                        <div class="stat-label">Artifacts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-accuracy">-</div>
+                        <div class="stat-label">Model Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-status">Checking...</div>
+                        <div class="stat-label">System Status</div>
+                    </div>
+                </div>
+
                 <!-- Camera Mode -->
                 <div id="camera-mode" class="scan-interface">
                     <div id="video-container" class="hidden">
                         <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="camera-overlay"></div>
                     </div>
-                    <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
-                    <button class="btn btn-primary hidden" id="capture-btn" onclick="captureImage()">Capture &
-                        Recognize</button>
-                    <button class="btn btn-secondary hidden" id="stop-camera-btn" onclick="stopCamera()">Stop
-                        Camera</button>
+
+                    <div id="camera-controls">
+                        <button id="start-camera-btn" class="btn btn-primary" onclick="startCamera()">📸 Start
+                            Camera</button>
+                        <div id="active-controls" class="hidden">
+                            <button class="btn btn-primary" id="capture-btn" onclick="captureImage()">✨ Capture &
+                                Recognize</button>
+                            <button class="btn btn-secondary" id="stop-camera-btn" onclick="stopCamera()">⏹ Stop
+                                Camera</button>
+                        </div>
+                    </div>
+                    <p id="model-warning" style="color: #e53e3e; margin-top: 10px; display: none;">⚠️ Model not trained
+                        yet. Please train in Admin Panel.</p>
                 </div>
 
 
@@ -536,8 +560,45 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            startCamera();
+            fetchStats();
         });
+
+        async function fetchStats() {
+            try {
+                // Fetch stats from Training API
+                const statsResponse = await fetch(`${TRAINING_API_BASE}/api/stats`);
+                const stats = await statsResponse.json();
+
+                // Fetch health/model status from ML API
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const health = await healthResponse.json();
+
+                document.getElementById('stat-artifacts').textContent = health.artifacts_loaded || 0;
+                document.getElementById('stat-accuracy').textContent = stats.last_training_accuracy ? `${Math.round(stats.last_training_accuracy)}%` : 'N/A';
+
+                const statusEl = document.getElementById('stat-status');
+                const startBtn = document.getElementById('start-camera-btn');
+                const warningEl = document.getElementById('model-warning');
+
+                if (health.model_loaded) {
+                    statusEl.textContent = 'Ready';
+                    statusEl.style.color = '#2e7d32';
+                    startBtn.disabled = false;
+                    warningEl.style.display = 'none';
+                } else {
+                    statusEl.textContent = 'Model Not Trained';
+                    statusEl.style.color = '#e53e3e';
+                    startBtn.disabled = true;
+                    startBtn.style.opacity = '0.5';
+                    startBtn.textContent = '🚫 Model Not Ready';
+                    warningEl.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                document.getElementById('stat-status').textContent = 'Error';
+            }
+        }
 
         // Camera functions
         async function startCamera() {

@@ -12,6 +12,7 @@ from pathlib import Path
 from PIL import Image
 import io
 import os
+import asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -117,16 +118,22 @@ async def add_artifact(
     period: str = Form(...),
     origin: str = Form(...),
     description: str = Form(...),
-    curator: str = Form("Museum Curator"),
+    curator: str = Form(...),
     images: List[UploadFile] = File(...),
-    documents: Optional[List[UploadFile]] = File(None)
+    documents: List[UploadFile] = File(default=[])
 ):
-    """
-    Add a new artifact with training images
-    """
+    """Add a new artifact with images and documents"""
+    print(f"📥 Received upload request for artifact: {name}")
+    print(f"   - Images: {len(images)}")
+    print(f"   - Documents: {len(documents)}")
+
     try:
         # Generate artifact ID
-        artifacts = load_artifacts()
+        loop = asyncio.get_running_loop()
+        
+        # Load artifacts in threadpool to avoid blocking
+        artifacts = await loop.run_in_executor(None, load_artifacts)
+
         max_id = 0
         for a in artifacts:
             try:
@@ -145,15 +152,22 @@ async def add_artifact(
         # Save images
         saved_images = []
         for idx, image_file in enumerate(images):
-            # Read and validate image
+            # Read image content (async)
             contents = await image_file.read()
-            img = Image.open(io.BytesIO(contents))
             
+            # Process image in threadpool
+            def process_and_save_image(content, path):
+                img = Image.open(io.BytesIO(content))
+                img.convert('RGB').save(path, 'JPEG', quality=95)
+                return str(path.relative_to(DATA_DIR))
+
             # Save image
             filename = f"{artifact_id}_{idx+1}.jpg"
             filepath = artifact_dir / filename
-            img.convert('RGB').save(filepath, 'JPEG', quality=95)
-            saved_images.append(str(filepath.relative_to(DATA_DIR)))
+            
+            relative_path = await loop.run_in_executor(None, process_and_save_image, contents, filepath)
+            saved_images.append(relative_path)
+            print(f"   ✅ Saved image: {filename}")
         
         if len(saved_images) < 5:
             # Cleanup if not enough valid images
@@ -183,17 +197,26 @@ async def add_artifact(
                     filepath = doc_dir / filename
                     
                     contents = await doc_file.read()
-                    with open(filepath, 'wb') as f:
-                        f.write(contents)
                     
-                    # Create embeddings
+                    # Save PDF to disk (blocking IO in threadpool)
+                    await loop.run_in_executor(None, lambda: filepath.write_bytes(contents))
+                    print(f"   ✅ Saved document: {filename}")
+                    
+                    # Create embeddings (HEAVY BLOCKING OPERATION)
                     if RAG_ENABLED:
-                        rag_service.create_embeddings(
-                            artifact_id=artifact_id,
-                            pdf_path=str(filepath),
-                            document_id=doc_id,
-                            filename=original_filename
+                        print(f"   🔄 Generating embeddings for {filename}...")
+                        success = await loop.run_in_executor(
+                            None, 
+                            rag_service.create_embeddings,
+                            artifact_id,
+                            str(filepath),
+                            doc_id,
+                            original_filename
                         )
+                        if success:
+                            print(f"   ✨ Embeddings created for {filename}")
+                        else:
+                            print(f"   ⚠️ Failed to create embeddings for {filename}")
                     
                     saved_documents.append({
                         "id": doc_id,
@@ -218,7 +241,8 @@ async def add_artifact(
         }
         
         artifacts.append(artifact)
-        save_artifacts(artifacts)
+        await loop.run_in_executor(None, save_artifacts, artifacts)
+        print(f"✅ Artifact '{name}' added successfully with ID {artifact_id}")
         
         # Trigger training in background
         if len(artifacts) >= 2:

@@ -437,7 +437,7 @@
                 <!-- Camera Mode -->
                 <div id="camera-mode" class="scan-interface">
                     <div id="video-container" class="hidden">
-                        <video id="camera-feed" autoplay playsinline></video>
+                        <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="camera-overlay"></div>
                     </div>
                     <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
@@ -530,11 +530,9 @@
     <script>
         let stream = null;
         let currentArtifact = null;
-        const PROTOCOL = window.location.protocol;
-        const HOSTNAME = window.location.hostname;
-        const API_BASE = `${PROTOCOL}//${HOSTNAME}:8000`;
-        const QA_API_BASE = `${PROTOCOL}//${HOSTNAME}:8002`;
-        const TRAINING_API_BASE = `${PROTOCOL}//${HOSTNAME}:8001`;
+        const API_BASE = `http://${window.location.hostname}:8000`;
+        const QA_API_BASE = `http://${window.location.hostname}:8002`;
+        const TRAINING_API_BASE = `http://${window.location.hostname}:8001`;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {

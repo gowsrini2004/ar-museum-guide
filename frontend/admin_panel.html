@@ -929,10 +929,19 @@
         document.getElementById('add-artifact-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Mobile Debugging
+            alert('Starting artifact upload...');
+
             if (selectedImages.length < 5) {
+                alert('Error: Please upload at least 5 images');
                 showToast('Please upload at least 5 images', 'error');
                 return;
             }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = '⏳ Uploading...';
+            submitBtn.disabled = true;
 
             const formData = new FormData();
             formData.append('name', document.getElementById('name').value);
@@ -954,6 +963,7 @@
 
                 const result = await response.json();
                 if (result.success) {
+                    alert('Success: Artifact added!');
                     showToast('Artifact added successfully!', 'success');
                     document.getElementById('add-artifact-form').reset();
                     document.getElementById('images-preview').innerHTML = '';
@@ -963,10 +973,15 @@
                     refreshArtifacts();
                     switchTab('artifacts');
                 } else {
+                    alert('Error: ' + result.message);
                     showToast('❌ ' + result.message, 'error');
                 }
             } catch (error) {
+                alert('Network/Server Error: ' + error.message);
                 showToast('❌ Failed to add artifact: ' + error.message, 'error');
+            } finally {
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
             }
         });
 

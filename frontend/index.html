@@ -542,6 +542,11 @@
         // Camera functions
         async function startCamera() {
             try {
+                // Check for secure context
+                if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    throw new Error('Camera access requires a secure connection (HTTPS) or localhost. On mobile, you cannot use HTTP with an IP address.');
+                }
+
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment' }
                 });
@@ -553,7 +558,20 @@
                 document.getElementById('stop-camera-btn').classList.remove('hidden');
                 event.target.classList.add('hidden');
             } catch (error) {
-                alert('Camera access denied or not available: ' + error.message);
+                console.error('Camera Error:', error);
+
+                let message = 'Camera access failed.';
+                let details = error.message;
+
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    message = '🚫 Camera Permission Denied';
+                    details = 'Please allow camera access in your browser settings and refresh.';
+                } else if (!window.isSecureContext) {
+                    message = '🔒 Security Restriction';
+                    details = 'Browsers block camera access on insecure (HTTP) connections. Please use localhost or setup HTTPS/ngrok.';
+                }
+
+                alert(`${message}\n\n${details}`);
             }
         }
 

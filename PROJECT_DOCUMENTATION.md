@@ -9,7 +9,7 @@ The project is built on a distributed micro-API architecture to ensure modularit
 
 ```mermaid
 graph TD
-    User((Visitor)) -->|Camera Stream| MobileView[Mobile User Interface]
+    User((Visitor)) -->|Live Camera Stream| MobileView[Mobile User Interface]
     Admin((Administrator)) -->|Upload Documents/Images| AdminPanel[Admin Dashboard]
     
     subgraph "Backend Services (Python/FastAPI)"
@@ -36,9 +36,9 @@ graph TD
 ## 3. Core Functional Modules
 
 ### 3.1 Artifact Recognition Engine (ML API)
-*   **Model**: Utilizes **MobileNetV2**, a lightweight deep learning architecture optimized for mobile devices.
-*   **Training**: Implements transfer learning to recognize specific museum artifacts from user-provided images.
-*   **Inference**: Processes real-time camera frames, returning identification confidence and artifact metadata.
+*   **Model**: Utilizes **ConvNeXt-Base**, one of the most advanced deep learning architectures for fine-grained image classification.
+*   **Training**: Implements transfer learning to recognize specific museum artifacts with high precision.
+*   **Inference**: Processes **live** camera frames automatically, returning identification confidence and artifact metadata without manual capture.
 *   **Dynamic Reloading**: The API automatically reloads the model weights whenever administrators trigger a retraining cycle, ensuring zero downtime.
 
 ### 3.2 Retrieval-Augmented Generation (RAG) Q&A (QA API)
@@ -63,11 +63,11 @@ sequenceDiagram
     participant M as ML API
     participant D as Data Store
     
-    U->>M: Send Camera Frame
-    M->>M: Preprocess Image (224x224)
-    M->>M: Run MobileNetV2 Inference
+    U->>M: Send Live Frame (Auto-Capture)
+    M->>M: Preprocess Image (ConvNeXt Scaling)
+    M->>M: Run ConvNeXt-Base Inference
     M->>D: Fetch Artifact Metadata
-    M-->>U: Return Artifact Details & Recognition Confidence
+    M-->>U: Return Details & Confidence (Requires 2 Stable Frames)
 ```
 
 ### 4.2 RAG Q&A Flow

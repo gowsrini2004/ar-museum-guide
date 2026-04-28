@@ -44,7 +44,7 @@ echo - Training API: http://localhost:8001/docs
 echo - QA API:       http://localhost:8002/docs
 echo.
 echo Web Interface:
-echo - Mobile Demo:  http://localhost:8080
+echo - Mobile Demo:  http://localhost:8080/index.html
 echo - Admin Panel:  http://localhost:8080/admin_panel.html
 echo.
 echo Waiting 5 seconds for servers to initialize...

@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 import json
+from datetime import datetime
 import shutil
 from pathlib import Path
 from PIL import Image
@@ -20,6 +21,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import RAG service
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
     from rag_service import get_rag_service
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -44,8 +47,10 @@ app.add_middleware(
 @app.middleware("http")
 async def add_no_cache_header(request, call_next):
     response = await call_next(request)
-    if request.url.path.startswith("/static"):
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    # Apply to all API and static requests to prevent stale training progress or images
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 # Data and Model directories
@@ -63,12 +68,185 @@ TRAINING_DIR.mkdir(parents=True, exist_ok=True)
 DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
+MODELS_3D_DIR = DATA_DIR / "models_3d"
+MODELS_3D_DIR.mkdir(parents=True, exist_ok=True)
+MEDIA_DIR = DATA_DIR / "media"
+MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Mount static files to serve images and documents
+# Mount static files
 app.mount("/static/training", StaticFiles(directory=str(TRAINING_DIR)), name="training_images")
 app.mount("/static/documents", StaticFiles(directory=str(DOCUMENTS_DIR)), name="documents_files")
+app.mount("/static/models", StaticFiles(directory=str(MODELS_3D_DIR)), name="artifact_models")
+app.mount("/static/media", StaticFiles(directory=str(MEDIA_DIR)), name="media_files")
 
-def run_training_task():
+# ─── AR 3D Model Upload ────────────────────────────────────────────────────────
+
+@app.post("/api/artifacts/{artifact_id}/upload-model")
+async def upload_3d_model(artifact_id: str, model_file: UploadFile = File(...)):
+    """Upload a GLB/GLTF 3D model for an artifact."""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    if not model_file.filename.lower().endswith(('.glb', '.gltf')):
+        raise HTTPException(status_code=400, detail="Only .glb or .gltf files are accepted")
+
+    model_dir = MODELS_3D_DIR / artifact_id
+    model_dir.mkdir(parents=True, exist_ok=True)
+    dest = model_dir / "model.glb"
+
+    with open(dest, "wb") as f:
+        content = await model_file.read()
+        f.write(content)
+
+    # Update artifact record
+    artifact["model_3d_path"] = f"models_3d/{artifact_id}/model.glb"
+    save_artifacts(artifacts)
+
+    return JSONResponse({"success": True, "message": f"3D model uploaded for {artifact['name']}"})
+
+
+@app.delete("/api/artifacts/{artifact_id}/upload-model")
+async def delete_3d_model(artifact_id: str):
+    """Remove the 3D model for an artifact."""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    model_path = MODELS_3D_DIR / artifact_id / "model.glb"
+    if model_path.exists():
+        model_path.unlink()
+
+    artifact.pop("model_3d_path", None)
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "message": "3D model removed"})
+
+
+# ─── AR Audio/Video Upload ────────────────────────────────────────────────────
+
+@app.post("/api/artifacts/{artifact_id}/upload-audio")
+async def upload_audio(artifact_id: str, audio_file: UploadFile = File(...)):
+    """Upload an MP3 audio file for an artifact."""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    if not audio_file.filename.lower().endswith('.mp3'):
+        raise HTTPException(status_code=400, detail="Only .mp3 files are accepted")
+
+    media_dir = MEDIA_DIR / artifact_id
+    media_dir.mkdir(parents=True, exist_ok=True)
+    dest = media_dir / "audio.mp3"
+
+    with open(dest, "wb") as f:
+        content = await audio_file.read()
+        f.write(content)
+
+    artifact["audio_path"] = f"media/{artifact_id}/audio.mp3"
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "message": f"Audio uploaded for {artifact['name']}"})
+
+
+@app.delete("/api/artifacts/{artifact_id}/upload-audio")
+async def delete_audio(artifact_id: str):
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    audio_path = MEDIA_DIR / artifact_id / "audio.mp3"
+    if audio_path.exists():
+        audio_path.unlink()
+
+    artifact.pop("audio_path", None)
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "message": "Audio removed"})
+
+
+@app.post("/api/artifacts/{artifact_id}/upload-video")
+async def upload_video(artifact_id: str, video_file: UploadFile = File(...)):
+    """Upload a video file for an artifact."""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    if not video_file.filename.lower().endswith(('.mp4', '.webm')):
+        raise HTTPException(status_code=400, detail="Only .mp4 or .webm files are accepted")
+
+    media_dir = MEDIA_DIR / artifact_id
+    media_dir.mkdir(parents=True, exist_ok=True)
+    
+    ext = video_file.filename.split('.')[-1].lower()
+    filename = f"video.{ext}"
+    dest = media_dir / filename
+
+    with open(dest, "wb") as f:
+        content = await video_file.read()
+        f.write(content)
+
+    artifact["video_path"] = f"media/{artifact_id}/{filename}"
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "message": f"Video uploaded for {artifact['name']}"})
+
+
+@app.delete("/api/artifacts/{artifact_id}/upload-video")
+async def delete_video(artifact_id: str):
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    media_dir = MEDIA_DIR / artifact_id
+    if media_dir.exists():
+        for file in media_dir.glob("video.*"):
+            file.unlink()
+
+    artifact.pop("video_path", None)
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "message": "Video removed"})
+
+
+# ─── AR Info Cards ────────────────────────────────────────────────────────────
+
+@app.get("/api/artifacts/{artifact_id}/ar-cards")
+async def get_ar_cards(artifact_id: str):
+    """Get the AR info cards for an artifact."""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+    return JSONResponse({"cards": artifact.get("ar_cards", [])})
+
+
+@app.put("/api/artifacts/{artifact_id}/ar-cards")
+async def save_ar_cards(artifact_id: str, request: dict):
+    """Save AR info cards for an artifact. Body: { cards: [{icon, title, body, color}] }"""
+    artifacts = load_artifacts()
+    artifact = next((a for a in artifacts if a["id"] == artifact_id), None)
+    if not artifact:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    cards = request.get("cards", [])
+    # Validate structure
+    validated = []
+    for c in cards:
+        validated.append({
+            "icon": str(c.get("icon", "📌"))[:8],
+            "title": str(c.get("title", "Info"))[:100],
+            "body": str(c.get("body", ""))[:2000],
+            "color": str(c.get("color", "#667eea"))[:20],
+        })
+
+    artifact["ar_cards"] = validated
+    save_artifacts(artifacts)
+    return JSONResponse({"success": True, "count": len(validated)})
+
+
+async def run_training_task():
     try:
         print("Starting background training task...")
         # Import inside function to avoid circular imports or path issues
@@ -85,6 +263,9 @@ def run_training_task():
             return
 
         print(f"Training on {len(artifacts)} artifacts...")
+        # Add a small delay to ensure the reset file is readable by frontend
+        await asyncio.sleep(1) 
+        
         results = train_artifact_model(
             data_dir=str(TRAINING_DIR),
             num_epochs=10,
@@ -94,6 +275,7 @@ def run_training_task():
         # Save stats
         stats = {
             "last_training_accuracy": results['best_accuracy'],
+            "avg_training_accuracy": results['avg_accuracy'],
             "training_epochs": results['num_epochs'],
             "last_trained": datetime.now().isoformat(),
             "total_classes": results['num_classes']
@@ -102,11 +284,28 @@ def run_training_task():
         with open(STATS_FILE, 'w') as f:
             json.dump(stats, f)
             
+        # Notify ML API to reload the new model
+        try:
+            import urllib.request
+            # We use localhost:8000 for the ML API
+            req = urllib.request.Request("http://localhost:8000/reload", method="POST")
+            with urllib.request.urlopen(req, timeout=5) as response:
+                print(f"[OK] ML API notified to reload. Status: {response.getcode()}")
+        except Exception as reload_err:
+            print(f"[WARN] Could not auto-reload ML API: {reload_err}")
+
         print("Background training completed successfully")
     except Exception as e:
         print(f"Background training failed: {e}")
         import traceback
         traceback.print_exc()
+        # Update progress file with error status
+        try:
+            progress_file = DATA_DIR / "training_progress.json"
+            with open(progress_file, 'w') as f:
+                json.dump({"status": "error", "message": str(e), "percent": 0}, f)
+        except:
+            pass
 
 def load_artifacts():
     """Load artifacts from JSON file"""
@@ -124,7 +323,7 @@ def save_artifacts(artifacts):
 
 def run_embedding_task(artifact_id: str, pdf_path: str, doc_id: str, filename: str):
     """Background task wrapper for embedding generation"""
-    print(f"🔄 Starting background embedding generation for {filename}...")
+    print(f"[*] Starting background embedding generation for {filename}...")
     try:
         success = rag_service.create_embeddings(
             artifact_id=artifact_id,
@@ -133,11 +332,11 @@ def run_embedding_task(artifact_id: str, pdf_path: str, doc_id: str, filename: s
             filename=filename
         )
         if success:
-            print(f"✨ Embeddings created for {filename}")
+            print(f"[OK] Embeddings created for {filename}")
         else:
-            print(f"⚠️ Failed to create embeddings for {filename}")
+            print(f"[WARN] Failed to create embeddings for {filename}")
     except Exception as e:
-        print(f"❌ Error in background embedding task: {e}")
+        print(f"[ERR] Error in background embedding task: {e}")
 
 
 @app.post("/api/artifacts/add")
@@ -154,7 +353,7 @@ async def add_artifact(
     documents: List[UploadFile] = File(default=[])
 ):
     """Add a new artifact with images and documents"""
-    print(f"📥 Received upload request for artifact: {name}")
+    print(f"[*] Received upload request for artifact: {name}")
     print(f"   - Images: {len(images)}")
     print(f"   - Documents: {len(documents)}")
 
@@ -191,7 +390,7 @@ async def add_artifact(
             
             relative_path = await loop.run_in_executor(None, process_and_save_image, contents, filepath)
             saved_images.append(relative_path)
-            print(f"   ✅ Saved image: {filename}")
+            print(f"   [OK] Saved image: {filename}")
         
         if len(saved_images) < 5:
             # Cleanup if not enough valid images
@@ -224,11 +423,11 @@ async def add_artifact(
                     
                     # Save PDF to disk (blocking IO in threadpool)
                     await loop.run_in_executor(None, lambda: filepath.write_bytes(contents))
-                    print(f"   ✅ Saved document: {filename}")
+                    print(f"   [OK] Saved document: {filename}")
                     
                     # Create embeddings (BACKGROUND TASK)
                     if RAG_ENABLED:
-                        print(f"   ⏳ Scheduled background embedding generation for {filename}")
+                        print(f"   [...] Scheduled background embedding generation for {filename}")
                         background_tasks.add_task(
                             run_embedding_task,
                             artifact_id,
@@ -261,7 +460,7 @@ async def add_artifact(
         
         artifacts.append(artifact)
         await loop.run_in_executor(None, save_artifacts, artifacts)
-        print(f"✅ Artifact '{name}' added successfully with ID {artifact_id}")
+        print(f"[OK] Artifact '{name}' added successfully with ID {artifact_id}")
         
         # Trigger training in background
         if len(artifacts) >= 2:
@@ -299,7 +498,11 @@ async def list_artifacts():
             "description": artifact["description"],
             "images": artifact.get("images", []),
             "num_images": artifact.get("num_images", 0),
-            "num_documents": artifact.get("num_documents", 0)
+            "num_documents": artifact.get("num_documents", 0),
+            "model_3d_path": artifact.get("model_3d_path", None),
+            "audio_path": artifact.get("audio_path", None),
+            "video_path": artifact.get("video_path", None),
+            "ar_cards": artifact.get("ar_cards", [])
         })
     
     return JSONResponse({
@@ -312,7 +515,7 @@ async def list_artifacts():
 @app.post("/api/model/train")
 async def train_model(background_tasks: BackgroundTasks):
     """
-    Train the model on all artifacts
+    Train the model on all artifacts in the background
     """
     try:
         artifacts = load_artifacts()
@@ -323,49 +526,53 @@ async def train_model(background_tasks: BackgroundTasks):
                 "message": "Need at least 2 artifacts to train the model"
             }, status_code=400)
         
-        # Import training code
-        try:
-            from train_model import train_artifact_model
-        except ImportError:
-            # Fallback for when running from different directory
-            import sys
-            sys.path.append(str(Path(__file__).parent))
-            from train_model import train_artifact_model
+        # Start training in background
+        # FIRST: Explicitly reset the progress file to "loading_data" 0% 
+        # This ensures the UI updates IMMEDIATELY even before the background thread kicks in fully
+        progress_file = DATA_DIR / "training_progress.json"
+        with open(progress_file, 'w') as f:
+            json.dump({
+                "status": "loading_data", 
+                "percent": 0, 
+                "epoch": 0, 
+                "total_epochs": 10,
+                "message": "Initializing training engine...",
+                "timestamp": datetime.now().isoformat()
+            }, f)
         
-        # Train the model synchronously for now to report success/failure immediately
-        # (User asked for it to work, so we ensure it runs)
-        results = train_artifact_model(
-            data_dir=str(TRAINING_DIR),
-            num_epochs=10,
-            batch_size=8
-        )
-        
-        # Save training stats
-        stats_file = DATA_DIR / "training_stats.json"
-        
-        # Calculate stats
-        stats = {
-            "last_training_accuracy": results['best_accuracy'],
-            "training_epochs": results['num_epochs'],
-            "last_trained": datetime.now().isoformat(),
-            "total_classes": results['num_classes']
-        }
-        
-        with open(stats_file, 'w') as f:
-            json.dump(stats, f)
+        background_tasks.add_task(run_training_task)
         
         return JSONResponse({
             "success": True,
-            "message": "Model trained successfully!",
-            "results": results
+            "message": "Training started in background. Follow progress in the dashboard."
         })
     
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return JSONResponse({
             "success": False,
-            "message": f"Training failed: {str(e)}"
+            "message": f"Could not start training: {str(e)}"
+        }, status_code=500)
+
+
+@app.get("/api/model/progress")
+async def get_training_progress():
+    """Get the current training progress from the progress file"""
+    progress_file = DATA_DIR / "training_progress.json"
+    if not progress_file.exists():
+        return JSONResponse({
+            "status": "idle",
+            "percent": 0,
+            "message": "No training in progress"
+        })
+    
+    try:
+        with open(progress_file, 'r') as f:
+            progress = json.load(f)
+        return JSONResponse(progress)
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "message": str(e)
         }, status_code=500)
 
 
@@ -684,7 +891,7 @@ async def upload_document_to_artifact(
                     f.write(contents)
                 
                 # Process with RAG service (BACKGROUND TASK)
-                print(f"   ⏳ Scheduled background embedding generation for {original_filename}")
+                print(f"   [...] Scheduled background embedding generation for {original_filename}")
                 background_tasks.add_task(
                     run_embedding_task,
                     artifact_id,
@@ -843,12 +1050,11 @@ async def get_stats():
 if __name__ == "__main__":
     import uvicorn
     print("""
-╔══════════════════════════════════════════════════════════╗
-║     AR Museum Guide - Training API Server               ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+      AR Museum Guide - Training API Server               
+============================================================
 
-🌐 API: http://localhost:8001
-📁 Data: {DATA_DIR}
+Data: {DATA_DIR}
 
 Endpoints:
   - POST /api/artifacts/add - Add new artifact with images and PDFs

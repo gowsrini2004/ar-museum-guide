@@ -457,6 +457,129 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            margin: 20px 0;
+            background: #eee;
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+            position: relative;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .training-details {
+            display: none;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* ===== MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 10px 0;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #eee;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab {
+                padding: 8px 16px;
+                font-size: 14px;
+                margin-right: 5px;
+                border-radius: 20px;
+            }
+
+            .tab.active {
+                background: #667eea;
+                color: white;
+                box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+            }
+
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+                border-radius: 16px;
+            }
+
+            .artifact-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .artifact-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .artifact-actions button {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .upload-area {
+                padding: 20px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 
@@ -579,6 +702,16 @@
                     </div>
                 </div>
 
+                <div id="training-ui" style="margin-top: 20px; display: none;">
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress-bar" id="progress-bar">0%</div>
+                    </div>
+                    <div class="training-details" id="training-details">
+                        <span id="training-step">Initializing...</span>
+                        <span id="training-epoch">Epoch: --/--</span>
+                    </div>
+                </div>
+
                 <div id="advanced-metrics" class="metrics-grid" style="display: none;">
                     <div class="metric-item">
                         <div class="metric-value" id="last-trained">Never</div>
@@ -617,6 +750,29 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
                 <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AR Card Editor Modal -->
+    <div id="card-editor-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>✨ AR Info Cards Editor</h3>
+                <button onclick="closeModal('card-editor-modal')" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+            
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">These cards float around the 3D artifact in AR mode. Users can swipe left/right to read them.</p>
+
+            <div id="card-editor-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; padding-right: 5px;">
+                <!-- Cards injected here -->
+            </div>
+
+            <button class="btn btn-secondary" onclick="addEmptyCardEditorRow()" style="margin-bottom: 20px; width: 100%; border-style: dashed;">➕ Add New Card</button>
+
+            <div class="modal-actions" style="margin-top: auto; border-top: 1px solid #eee; padding-top: 15px;">
+                <button class="btn btn-secondary" onclick="closeModal('card-editor-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-cards-btn" onclick="saveARCards()">Save Cards</button>
             </div>
         </div>
     </div>
@@ -735,6 +891,71 @@
                             <p>➕ Upload PDF Documents</p>
                         </div>
                         <input type="file" id="add-docs-${artifact.id}" multiple accept=".pdf" style="display: none;" onchange="addDocuments('${artifact.id}', event)">
+
+                        <!-- AR 3D Experience (Models & Cards) -->
+                        <h4 style="margin-top: 35px; color: #764ba2; border-top: 1px solid #eee; padding-top: 15px;">🔮 AR 3D Experience</h4>
+                        <div class="ar-config-section" style="background: #f8f9ff; padding: 20px; border-radius: 12px; margin-top: 15px; border: 1px solid #e2e8f0; display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr);">
+                            
+                            <!-- 3D Model Upload -->
+                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h5 style="margin-bottom: 8px;">3D Model (.glb)</h5>
+                                <div id="model-status-${artifact.id}" style="margin-bottom: 15px; font-size: 13px;">
+                                    ${artifact.model_3d_path ? 
+                                        `<span style="color:green;font-weight:600;">✅ Uploaded</span> 
+                                         <button onclick="delete3DModel('${artifact.id}')" style="margin-left: 10px; color: #d32f2f; background: none; border: none; cursor: pointer;">Remove</button>` : 
+                                        `<span style="color:#666;">No model</span>`
+                                    }
+                                </div>
+                                <div class="upload-area" onclick="document.getElementById('add-model-${artifact.id}').click()" style="padding: 10px; border-style: dashed; border-color: #764ba2; font-size: 13px; margin: 0;">
+                                    <p>➕ Upload .glb</p>
+                                </div>
+                                <input type="file" id="add-model-${artifact.id}" accept=".glb,.gltf" style="display: none;" onchange="upload3DModel('${artifact.id}', event)">
+                            </div>
+
+                            <!-- Audio Upload -->
+                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h5 style="margin-bottom: 8px;">Audio Guide (.mp3)</h5>
+                                <div id="audio-status-${artifact.id}" style="margin-bottom: 15px; font-size: 13px;">
+                                    ${artifact.audio_path ? 
+                                        `<span style="color:green;font-weight:600;">✅ Uploaded</span> 
+                                         <button onclick="deleteAudio('${artifact.id}')" style="margin-left: 10px; color: #d32f2f; background: none; border: none; cursor: pointer;">Remove</button>` : 
+                                        `<span style="color:#666;">No audio</span>`
+                                    }
+                                </div>
+                                <div class="upload-area" onclick="document.getElementById('add-audio-${artifact.id}').click()" style="padding: 10px; border-style: dashed; border-color: #764ba2; font-size: 13px; margin: 0;">
+                                    <p>➕ Upload .mp3</p>
+                                </div>
+                                <input type="file" id="add-audio-${artifact.id}" accept=".mp3" style="display: none;" onchange="uploadAudio('${artifact.id}', event)">
+                            </div>
+
+                            <!-- Video Upload -->
+                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <h5 style="margin-bottom: 8px;">Video Intro (.mp4)</h5>
+                                <div id="video-status-${artifact.id}" style="margin-bottom: 15px; font-size: 13px;">
+                                    ${artifact.video_path ? 
+                                        `<span style="color:green;font-weight:600;">✅ Uploaded</span> 
+                                         <button onclick="deleteVideo('${artifact.id}')" style="margin-left: 10px; color: #d32f2f; background: none; border: none; cursor: pointer;">Remove</button>` : 
+                                        `<span style="color:#666;">No video</span>`
+                                    }
+                                </div>
+                                <div class="upload-area" onclick="document.getElementById('add-video-${artifact.id}').click()" style="padding: 10px; border-style: dashed; border-color: #764ba2; font-size: 13px; margin: 0;">
+                                    <p>➕ Upload .mp4</p>
+                                </div>
+                                <input type="file" id="add-video-${artifact.id}" accept=".mp4,.webm" style="display: none;" onchange="uploadVideo('${artifact.id}', event)">
+                            </div>
+                        </div>
+
+                        <!-- Info Cards UI -->
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h5>AR Info Cards</h5>
+                                <button class="btn btn-primary" onclick="openCardEditor('${artifact.id}')" style="padding: 4px 10px; font-size: 12px;">Edit Cards</button>
+                            </div>
+                            <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Swipeable floating cards orbiting the 3D model.</p>
+                            <div id="cards-preview-${artifact.id}" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;">
+                                <span style="font-size: 13px; color: #999;">Load cards to preview...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -757,15 +978,6 @@
             const content = document.getElementById(`expand-${artifactId}`);
             const icon = document.getElementById(`expand-icon-${artifactId}`);
 
-            // Close others first (optional, but keeps UI clean)
-            // artifacts.forEach(a => {
-            //     if (a.id !== artifactId) {
-            //         document.getElementById(`expand-${a.id}`)?.classList.remove('show');
-            //         const otherIcon = document.getElementById(`expand-icon-${a.id}`);
-            //         if (otherIcon) otherIcon.textContent = '▼';
-            //     }
-            // });
-
             if (content.classList.contains('show')) {
                 content.classList.remove('show');
                 icon.textContent = '▼';
@@ -778,6 +990,7 @@
                 // Load images and documents only when expanded
                 loadArtifactImages(artifactId);
                 loadDocuments(artifactId);
+                loadARCardsPreview(artifactId);
             }
         }
 
@@ -1076,47 +1289,104 @@
             updateDocumentPreview();
         }
 
+        let progressInterval = null;
+
+        function startProgressPolling() {
+            if (progressInterval) return;
+
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('training-details').style.display = 'flex';
+            document.getElementById('train-btn').disabled = true;
+
+            progressInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/model/progress`);
+                    const data = await response.json();
+
+                    updateProgressUI(data);
+
+                    if (data.status === 'completed' || data.status === 'error' || data.status === 'idle') {
+                        stopProgressPolling();
+                        if (data.status === 'completed') {
+                            showToast('Training completed successfully!', 'success');
+                            updateStats();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 1000);
+        }
+
+        function stopProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            document.getElementById('train-btn').disabled = false;
+            // Keep container visible for a moment then hide if idle
+        }
+
+        function updateProgressUI(data) {
+            const bar = document.getElementById('progress-bar');
+            const step = document.getElementById('training-step');
+            const epoch = document.getElementById('training-epoch');
+            const badge = document.getElementById('training-status-badge');
+
+            const percent = data.percent || 0;
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+
+            let statusText = 'Processing...';
+            if (data.status === 'extracting_features') statusText = '⚙️ Extracting Features (Slowest part)';
+            if (data.status === 'training') statusText = '🧬 Training Classifier (Super Fast)';
+            if (data.status === 'completed') statusText = '✅ Finished';
+            if (data.status === 'loading_data') statusText = '📂 Loading Images';
+
+            step.textContent = statusText;
+
+            if (data.epoch !== undefined && data.total_epochs !== undefined) {
+                epoch.textContent = `Epoch: ${data.epoch}/${data.total_epochs}`;
+            }
+
+            if (data.status === 'training' || data.status === 'extracting_features') {
+                badge.className = 'status-badge warning';
+                badge.textContent = '⚡ Training...';
+            }
+        }
+
         // Train model
         async function trainModel() {
-            if (!confirm('Train the model with current artifacts? This may take a few minutes.')) return;
+            if (!confirm('Train the model with optimized Feature Caching? This will be much faster after initial extraction.')) return;
 
             const btn = document.getElementById('train-btn');
             const debugEl = document.getElementById('debug-info');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Training in progress...';
+            btn.innerHTML = '⏳ Initializing...';
             btn.disabled = true;
 
-            // Show debug info
-            if (debugEl) {
-                debugEl.style.display = 'block';
-                debugEl.textContent = `Starting training...\nEndpoint: ${API_BASE}/api/model/train`;
-            }
-
             try {
-                showToast('Training started...', 'info');
+                showToast('Training job submitted...', 'info');
 
-                // FIXED: Correct endpoint is /api/model/train
+                // Show progress UI immediately
+                document.getElementById('progress-container').style.display = 'block';
+                document.getElementById('training-details').style.display = 'flex';
+
+                // Submit training request
                 const response = await fetch(`${API_BASE}/api/model/train`, { method: 'POST' });
 
-                if (debugEl) debugEl.textContent += `\nResponse status: ${response.status}`;
+                // Start polling immediately regardless of immediate response
+                // (Server handles it in background or sync, but we poll the file either way)
+                startProgressPolling();
 
                 const result = await response.json();
-
-                if (debugEl) debugEl.textContent += `\nResult: ${JSON.stringify(result).substring(0, 100)}...`;
-
-                if (result.success) {
-                    showToast('Model trained successfully!', 'success');
-                    updateStats();
-                } else {
-                    showToast('❌ Training failed: ' + result.message, 'error');
+                if (!result.success) {
+                    showToast('❌ Training failed to start: ' + result.message, 'error');
+                    stopProgressPolling();
                 }
             } catch (error) {
                 console.error('Training Error:', error);
-                if (debugEl) debugEl.textContent += `\nError: ${error.message}`;
-                showToast('❌ Training failed: ' + error.message, 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                showToast('❌ Server error during training', 'error');
+                stopProgressPolling();
             }
         }
 
@@ -1196,12 +1466,284 @@
                 document.getElementById('metrics-classes').textContent = data.total_artifacts;
 
                 advancedMetrics.style.display = 'grid';
+
+                // Check for active training to resume polling
+                const progressResponse = await fetch(`${API_BASE}/api/model/progress`);
+                const progressData = await progressResponse.json();
+                if (progressData.status === 'training' || progressData.status === 'extracting_features' || progressData.status === 'loading_data') {
+                    document.getElementById('training-ui').style.display = 'block';
+                    document.getElementById('model-actions').style.display = 'none';
+                    startProgressPolling();
+                } else {
+                    document.getElementById('training-ui').style.display = 'none';
+                    document.getElementById('model-actions').style.display = 'flex';
+                }
             } catch (error) {
                 console.error('Failed to update stats:', error);
             }
         }
 
+        // ==========================================
+        // AR 3D Editor Handlers
+        // ==========================================
+
+        async function upload3DModel(artifactId, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.glb') && !file.name.toLowerCase().endsWith('.gltf')) {
+                showToast('❌ Only .glb or .gltf files are allowed', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('model_file', file);
+
+            const statusEl = document.getElementById(`model-status-${artifactId}`);
+            statusEl.innerHTML = '<span style="color: #667eea;">⏳ Uploading model...</span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-model`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ 3D Model uploaded successfully!');
+                    refreshArtifacts();
+                } else {
+                    showToast('❌ Failed: ' + data.detail, 'error');
+                }
+            } catch (err) {
+                showToast('❌ Error uploading model', 'error');
+            }
+        }
+
+        async function delete3DModel(artifactId) {
+            if (!confirm('Remove the 3D model for this artifact?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-model`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('🗑️ 3D Model removed');
+                    refreshArtifacts();
+                }
+            } catch (err) {
+                showToast('❌ Error deleting model', 'error');
+            }
+        }
+
+        async function uploadAudio(artifactId, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.mp3')) {
+                showToast('❌ Only .mp3 files are allowed', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('audio_file', file);
+
+            const statusEl = document.getElementById(`audio-status-${artifactId}`);
+            statusEl.innerHTML = '<span style="color: #667eea;">⏳ Uploading audio...</span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-audio`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ Audio guide uploaded successfully!');
+                    refreshArtifacts();
+                } else {
+                    showToast('❌ Failed: ' + data.detail, 'error');
+                }
+            } catch (err) {
+                showToast('❌ Error uploading audio', 'error');
+            }
+        }
+
+        async function deleteAudio(artifactId) {
+            if (!confirm('Remove the audio guide for this artifact?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-audio`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('🗑️ Audio removed');
+                    refreshArtifacts();
+                }
+            } catch (err) {
+                showToast('❌ Error deleting audio', 'error');
+            }
+        }
+
+        async function uploadVideo(artifactId, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.mp4') && !file.name.toLowerCase().endsWith('.webm')) {
+                showToast('❌ Only .mp4 or .webm files are allowed', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('video_file', file);
+
+            const statusEl = document.getElementById(`video-status-${artifactId}`);
+            statusEl.innerHTML = '<span style="color: #667eea;">⏳ Uploading video...</span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-video`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ Video intro uploaded successfully!');
+                    refreshArtifacts();
+                } else {
+                    showToast('❌ Failed: ' + data.detail, 'error');
+                }
+            } catch (err) {
+                showToast('❌ Error uploading video', 'error');
+            }
+        }
+
+        async function deleteVideo(artifactId) {
+            if (!confirm('Remove the video intro for this artifact?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/artifacts/${artifactId}/upload-video`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('🗑️ Video removed');
+                    refreshArtifacts();
+                }
+            } catch (err) {
+                showToast('❌ Error deleting video', 'error');
+            }
+        }
+
+        let editingArtifactId = null;
+
+        function loadARCardsPreview(artifactId) {
+            const artifact = artifacts.find(a => a.id === artifactId);
+            const container = document.getElementById(`cards-preview-${artifactId}`);
+            if (!artifact) return;
+
+            const cards = artifact.ar_cards || [];
+            if (cards.length === 0) {
+                container.innerHTML = `<span style="font-size: 13px; color: #999;">Using default generated cards</span>`;
+                return;
+            }
+
+            container.innerHTML = cards.map((c, i) => `
+                <div style="background: ${c.color || '#667eea'}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; white-space: nowrap;">
+                    ${c.icon} ${c.title}
+                </div>
+            `).join('');
+        }
+
+        function openCardEditor(artifactId) {
+            editingArtifactId = artifactId;
+            const artifact = artifacts.find(a => a.id === artifactId);
+            const container = document.getElementById('card-editor-list');
+            container.innerHTML = '';
+
+            const cards = artifact.ar_cards || [];
+            
+            if (cards.length === 0) {
+                // Pre-fill some defaults if empty
+                addCardEditorRow({ icon: '🏺', title: artifact.name, body: artifact.description, color: '#667eea' });
+                addCardEditorRow({ icon: '📅', title: 'Origin', body: artifact.origin, color: '#764ba2' });
+            } else {
+                cards.forEach(c => addCardEditorRow(c));
+            }
+
+            document.getElementById('card-editor-modal').classList.add('show');
+        }
+
+        function addEmptyCardEditorRow() {
+            addCardEditorRow({ icon: '📌', title: '', body: '', color: '#e04b8a' });
+        }
+
+        function addCardEditorRow(cardData) {
+            const container = document.getElementById('card-editor-list');
+            const row = document.createElement('div');
+            row.className = 'card-edit-row';
+            row.style.cssText = 'background: #f8f9ff; padding: 15px; border-radius: 8px; border: 1px solid #d1d5db; position: relative;';
+            
+            row.innerHTML = `
+                <button onclick="this.parentElement.remove()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px;">✕</button>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" class="card-icon-input" value="${cardData.icon}" placeholder="Emoji" style="width: 50px; text-align: center; font-size: 18px; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                    <input type="text" class="card-title-input" value="${cardData.title}" placeholder="Card Title" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                    <input type="color" class="card-color-input" value="${cardData.color}" style="width: 40px; height: 38px; border: none; padding: 0; background: none; cursor: pointer;">
+                </div>
+                <textarea class="card-body-input" placeholder="Write the card details here..." rows="3" style="width: 100%; resize: vertical; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">${cardData.body}</textarea>
+            `;
+            container.appendChild(row);
+        }
+
+        async function saveARCards() {
+            const btn = document.getElementById('save-cards-btn');
+            btn.innerHTML = '⏳ Saving...';
+            btn.disabled = true;
+
+            const rows = document.querySelectorAll('.card-edit-row');
+            const cards = [];
+            
+            rows.forEach(row => {
+                const title = row.querySelector('.card-title-input').value.trim();
+                const body = row.querySelector('.card-body-input').value.trim();
+                if (title || body) {
+                    cards.push({
+                        icon: row.querySelector('.card-icon-input').value.trim() || '📌',
+                        title: title || 'Info',
+                        body: body,
+                        color: row.querySelector('.card-color-input').value
+                    });
+                }
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/artifacts/${editingArtifactId}/ar-cards`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cards })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ AR Info Cards Saved!');
+                    closeModal('card-editor-modal');
+                    const artifact = artifacts.find(a => a.id === editingArtifactId);
+                    if (artifact) {
+                        artifact.ar_cards = cards;
+                        loadARCardsPreview(editingArtifactId);
+                    }
+                }
+            } catch(e) {
+                showToast('❌ Error saving cards', 'error');
+            } finally {
+                btn.innerHTML = 'Save Cards';
+                btn.disabled = false;
+            }
+        }
+
+
         // Toast notification
+
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;

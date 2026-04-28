@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR 3D Viewer — Museum Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a1a;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ===== TOP BAR ===== */
+        #top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.25);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 16px;
+            z-index: 100;
+        }
+
+        #back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            color: #a0aaff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        #back-btn:hover {
+            background: rgba(102, 126, 234, 0.35);
+        }
+
+        #artifact-title {
+            flex: 1;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        #artifact-subtitle {
+            color: #667eea;
+            font-size: 0.8em;
+            font-weight: 400;
+            display: block;
+        }
+
+        #ar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.15);
+            color: #a0aaff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .top-btn:hover {
+            background: rgba(102, 126, 234, 0.35);
+            color: white;
+        }
+
+        .top-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .top-btn.primary:hover {
+            opacity: 0.85;
+        }
+
+        /* ===== 3D CANVAS ===== */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #0a0a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            gap: 20px;
+        }
+
+        .loader-ring {
+            width: 64px;
+            height: 64px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #loading-text {
+            color: #a0aaff;
+            font-size: 14px;
+        }
+
+        /* ===== BOTTOM ADMIN CARDS PANEL ===== */
+        #card-panel {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(380px, 60vw);
+            z-index: 200;
+            transition: all 0.4s ease;
+        }
+
+        /* ===== LEFT INFO PANEL ===== */
+        #left-panel {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 320px;
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 200;
+            background: rgba(15, 15, 40, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.35);
+            border-radius: 18px;
+            padding: 18px 16px;
+            color: white;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            animation: cardIn 0.4s ease;
+            scrollbar-width: none;
+        }
+
+        #left-panel::-webkit-scrollbar {
+            display: none;
+        }
+
+        #left-panel .panel-label {
+            font-size: 0.65em;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        #left-panel .panel-value {
+            font-size: 1em;
+            color: #c0c8e8;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        #left-panel .panel-value:hover {
+            background: rgba(102, 126, 234, 0.15);
+            transform: translateX(8px);
+            box-shadow: -4px 0 0 #667eea;
+            color: white;
+        }
+
+        #left-panel .panel-title {
+            font-size: 1.2em;
+            font-weight: 800;
+            color: #e8eaff;
+            margin-bottom: 14px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.5);
+            padding-bottom: 12px;
+            text-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ===== RIGHT IMAGE PANEL ===== */
+        #right-panel {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 220px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            border-radius: 18px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            animation: cardIn 0.4s ease;
+        }
+
+        #right-panel-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 6px;
+        }
+
+        #right-panel .img-thumb {
+            width: 200px;
+            height: 240px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+        }
+
+        #right-panel .img-thumb:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8);
+            border-color: rgba(102, 126, 234, 0.8);
+        }
+
+        #right-panel .img-title {
+            background: rgba(15, 15, 40, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.35);
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+            font-size: 0.7em;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .carousel-btn {
+            width: 100%;
+            background: rgba(15, 15, 40, 0.82);
+            backdrop-filter: blur(20px);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.35);
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 6px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-card {
+            background: rgba(15, 15, 40, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.35);
+            border-radius: 20px;
+            padding: 22px 24px;
+            color: white;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+            animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .info-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4), 0 0 0 2px rgba(102, 126, 234, 0.5);
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-color, linear-gradient(90deg, #667eea, #764ba2));
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            font-size: 28px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(102, 126, 234, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: #e8eaff;
+        }
+
+        .card-subtitle {
+            font-size: 0.75em;
+            color: #667eea;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .card-body {
+            font-size: 0.9em;
+            color: #c0c8e8;
+            line-height: 1.65;
+        }
+
+        .card-counter {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: #667eea;
+            width: 18px;
+            border-radius: 3px;
+        }
+
+        .card-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.1);
+            color: #a0aaff;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        /* Empty state card */
+        .empty-card {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        /* ===== HINT LABEL ===== */
+        #hint-label {
+            position: fixed;
+            bottom: 195px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #aaa;
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        /* ===== MODEL STATUS ===== */
+        #model-status {
+            position: fixed;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 200, 60, 0.15);
+            border: 1px solid rgba(255, 200, 60, 0.4);
+            color: #ffd166;
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            z-index: 150;
+            display: none;
+        }
+
+        /* ===== AR BACKING LAYER ===== */
+        #ar-video {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+            display: none;
+        }
+
+        /* ===== PARTICLE CANVAS ===== */
+        #particle-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        /* ===== FULLSCREEN EXPAND ===== */
+        #card-expand-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        #card-expand-overlay.open {
+            display: flex;
+        }
+
+        .expanded-card {
+            background: rgba(20, 20, 50, 0.95);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 24px;
+            padding: 36px;
+            max-width: 560px;
+            width: 100%;
+            position: relative;
+        }
+
+        .expanded-card .card-icon {
+            font-size: 44px;
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+        }
+
+        .expanded-card .card-title {
+            font-size: 1.4em;
+        }
+
+        .expanded-card .card-body {
+            font-size: 1em;
+            margin-top: 16px;
+        }
+
+        #close-expand {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== VIDEO OVERLAY ===== */
+        #video-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(25px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #video-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        #artifact-video {
+            width: 80%;
+            max-width: 900px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            background: black;
+        }
+
+        #skip-video-btn {
+            margin-top: 20px;
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        #skip-video-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== MEDIA CONTROLS ===== */
+        #media-controls {
+            display: none;
+            align-items: center;
+            background: rgba(15, 15, 40, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.35);
+            border-radius: 30px;
+            padding: 6px 16px;
+            margin-left: 15px;
+            gap: 12px;
+            width: 250px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .media-play-btn {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .media-play-btn:hover {
+            background: rgba(102, 126, 234, 0.5);
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            pointer-events: none;
+        }
+
+        .time-text {
+            color: #a0aaff;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 35px;
+            text-align: right;
+            user-select: none;
+        }
+
+        /* ===== MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            #top-bar {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                height: auto;
+                gap: 10px;
+            }
+
+            #artifact-title {
+                font-size: 1.1em;
+            }
+
+            #ar-buttons {
+                width: 100%;
+                justify-content: space-between;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+
+            .top-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            #left-panel {
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: auto;
+                width: 100%;
+                transform: translateY(calc(100% - 60px)); /* Peak only handle */
+                max-height: 80vh;
+                overflow-y: auto;
+                background: rgba(15, 15, 35, 0.95);
+                backdrop-filter: blur(25px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 24px 24px 0 0;
+                z-index: 2000;
+                transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                padding-top: 20px;
+                box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            }
+
+            #left-panel.drawer-open {
+                transform: translateY(0);
+            }
+
+            .drawer-handle {
+                display: block !important;
+                width: 40px;
+                height: 5px;
+                background: rgba(255,255,255,0.3);
+                border-radius: 10px;
+                margin: 0 auto 15px;
+                cursor: pointer;
+            }
+
+            #right-panel {
+                right: 0;
+                left: 0;
+                top: 75px;
+                bottom: auto;
+                width: 100%;
+                transform: none;
+                max-height: 110px;
+                flex-direction: row;
+                align-items: center;
+                padding: 0 10px;
+                gap: 5px;
+                background: transparent;
+                box-shadow: none;
+                z-index: 100;
+            }
+
+            #right-panel .img-title {
+                display: none; /* Hide title on mobile to save space */
+            }
+
+            #right-panel-wrapper {
+                max-height: none;
+                width: 100%;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            #right-panel-inner {
+                flex-direction: row;
+                height: 100%;
+            }
+
+            #right-panel .img-thumb {
+                width: 90px;
+                height: 90px;
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .carousel-btn {
+                transform: rotate(90deg); /* Turn arrows sideways for horizontal scroll */
+                margin: 0 !important;
+            }
+
+            #card-panel {
+                width: calc(100% - 40px);
+                bottom: 120px; /* Lift above bottom info panel */
+            }
+
+            .video-wrapper {
+                width: 95%;
+            }
+
+            #left-popout {
+                left: 20px !important;
+                right: 20px !important;
+                width: auto !important;
+                top: 50% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <div id="loading-text">Loading 3D Experience...</div>
+    </div>
+
+    <!-- Video Overlay -->
+    <div id="video-overlay">
+        <div class="video-wrapper" style="position: relative; width: 80%; max-width: 900px; display: flex; flex-direction: column; align-items: center;">
+            <video id="artifact-video" playsinline preload="metadata" style="width: 100%; border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); border: 2px solid rgba(102, 126, 234, 0.3);"></video>
+            <div id="custom-video-controls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; background: rgba(15, 15, 40, 0.85); backdrop-filter: blur(15px); border-radius: 20px; padding: 10px 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(102, 126, 234, 0.35); box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                <button class="media-play-btn" id="custom-video-play" onclick="toggleVideo()">⏸</button>
+                <div class="progress-container" id="video-progress-container">
+                    <div class="progress-fill" id="video-progress-fill"></div>
+                </div>
+                <span class="time-text" id="video-time">0:00</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button id="skip-video-btn" onclick="skipVideo()">Skip Intro Video ⏭</button>
+            <button id="play-video-btn" onclick="playIntroVideo()" style="display: none; padding: 10px 24px; background: rgba(102, 126, 234, 0.8); border: 1px solid rgba(102, 126, 234, 1); color: white; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 15px rgba(102,126,234,0.4);">▶ Play Video</button>
+        </div>
+    </div>
+
+    <!-- Hidden Audio -->
+    <audio id="artifact-audio"></audio>
+
+    <!-- AR Camera Background -->
+    <video id="ar-video" autoplay playsinline></video>
+
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Top Bar -->
+    <div id="top-bar">
+        <a id="back-btn" href="javascript:void(0)"
+            onclick="if(window.history.length > 2) { history.back(); } else { window.close(); }">←</a>
+        <div style="flex:1">
+            <div id="artifact-title">Loading...</div>
+            <span id="artifact-subtitle">AR 3D Museum Experience</span>
+        </div>
+        <div id="ar-buttons">
+            <div id="media-controls">
+                <button class="media-play-btn" id="custom-audio-play" onclick="toggleAudio()">⏸</button>
+                <div class="progress-container" id="audio-progress-container">
+                    <div class="progress-fill" id="audio-progress-fill"></div>
+                </div>
+                <span class="time-text" id="audio-time">0:00</span>
+            </div>
+            <button class="top-btn" onclick="replayVideo()" id="replay-video-btn" style="display: none;">▶ Replay Video</button>
+            <button class="top-btn" onclick="toggleARMode()" id="ar-mode-btn">📹 AR Mode</button>
+            <button class="top-btn" onclick="toggleAutoRotate()" id="rotate-btn">⏸ Pause</button>
+            <button class="top-btn" onclick="resetCamera()">↺ Reset</button>
+        </div>
+    </div>
+
+    <!-- Model Status (no model uploaded) -->
+    <div id="model-status">⚠️ No 3D model uploaded — showing preview mode</div>
+
+    <!-- Hint -->
+    <div id="hint-label">Drag to rotate · Scroll to zoom</div>
+
+    <!-- LEFT: Artifact Info Panel -->
+    <div id="left-panel">
+        <div class="drawer-handle" id="drawer-handle" style="display:none"></div>
+        <div id="left-panel-inner">
+            <div style="color:#888;font-size:0.8em">Loading info...</div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Image Gallery Panel -->
+    <div id="right-panel">
+        <div class="img-title">📸 Archives</div>
+        <button class="carousel-btn" id="scroll-up-btn" onclick="manualScrollRight(-1)" style="margin-bottom: 8px;">▲</button>
+        <div id="right-panel-wrapper" style="overflow: hidden; max-height: calc(60vh - 80px);">
+            <div id="right-panel-inner"></div>
+        </div>
+        <button class="carousel-btn" id="scroll-down-btn" onclick="manualScrollRight(1)" style="margin-top: 8px;">▼</button>
+    </div>
+
+    <!-- BOTTOM: Admin Cards Panel -->
+    <div id="card-panel">
+        <div class="info-card" id="current-card">
+            <div class="empty-card">No admin cards yet.</div>
+        </div>
+    </div>
+
+    <!-- Full Expanded Card Overlay -->
+    <div id="card-expand-overlay">
+        <div class="expanded-card" id="expanded-card-content">
+            <button id="close-expand" onclick="closeExpand()">✕</button>
+        </div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/RGBELoader.js"></script>
+
+    <script>
+        // ========================
+        // CONFIG
+        // ========================
+        const TRAINING_API = `http://${window.location.hostname}:8001`;
+        const params = new URLSearchParams(window.location.search);
+        const ARTIFACT_ID = params.get('id') || '';
+        const ARTIFACT_NAME = params.get('name') || 'Unknown Artifact';
+
+        // ========================
+        // PARTICLE STARFIELD
+        // ========================
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+            stars = Array.from({ length: 180 }, () => ({
+                x: Math.random() * pCanvas.width,
+                y: Math.random() * pCanvas.height,
+                r: Math.random() * 1.5 + 0.3,
+                a: Math.random(),
+                speed: Math.random() * 0.004 + 0.001
+            }));
+        }
+
+        function animateStars() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            stars.forEach(s => {
+                s.a += s.speed;
+                const alpha = (Math.sin(s.a) + 1) / 2 * 0.7 + 0.1;
+                pCtx.beginPath();
+                pCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                pCtx.fillStyle = `rgba(160,180,255,${alpha})`;
+                pCtx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        initStars();
+        animateStars();
+        window.addEventListener('resize', initStars);
+
+        // ========================
+        // THREE.JS SCENE SETUP
+        // ========================
+        const canvas3D = document.getElementById('three-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas3D, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0.5, 3.5);
+
+        // OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.enablePan = false;
+        controls.minDistance = 1.2;
+        controls.maxDistance = 8;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.2;
+
+        // Lighting rig
+        const ambientLight = new THREE.AmbientLight(0x8899ff, 0.6);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0xffeedd, 2.5);
+        keyLight.position.set(3, 4, 2);
+        scene.add(keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0x667eea, 1.0);
+        fillLight.position.set(-3, 2, -2);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0x764ba2, 0.8);
+        rimLight.position.set(0, -2, -3);
+        scene.add(rimLight);
+
+        // Ground glow ring
+        const ringGeo = new THREE.RingGeometry(0.7, 1.0, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x667eea,
+            transparent: true,
+            opacity: 0.18,
+            side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = -1;
+        scene.add(ring);
+
+        // ========================
+        // MODEL LOADING
+        // ========================
+        let currentModel = null;
+        let autoRotating = true;
+
+        async function loadModel(artifactData) {
+            const modelUrl = `${TRAINING_API}/static/models/${artifactData.id}/model.glb`;
+
+            // Try loading GLTF
+            const loader = new THREE.GLTFLoader();
+            return new Promise((resolve) => {
+                loader.load(
+                    modelUrl,
+                    (gltf) => {
+                        const model = gltf.scene;
+                        normalizeModel(model);
+                        scene.add(model);
+                        currentModel = model;
+                        resolve(true);
+                    },
+                    undefined,
+                    () => {
+                        // Fallback: procedural mesh with artifact image texture
+                        loadFallbackMesh(artifactData);
+                        document.getElementById('model-status').style.display = 'block';
+                        resolve(false);
+                    }
+                );
+            });
+        }
+
+        function normalizeModel(model) {
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            
+            // Adjust scale for mobile portrait vs desktop
+            const isMobile = window.innerWidth <= 768;
+            const scale = (isMobile ? 1.4 : 1.8) / maxDim;
+            
+            model.scale.setScalar(scale);
+            model.position.sub(center.multiplyScalar(scale));
+            
+            // Lift slightly on mobile to avoid bottom drawer
+            if (isMobile) model.position.y += 0.2;
+        }
+
+        function loadFallbackMesh(artifactData) {
+            // Load first artifact image as texture
+            const loader = new THREE.TextureLoader();
+            const imgPath = artifactData.images && artifactData.images[0]
+                ? `${TRAINING_API}/static/training/${artifactData.id}/${artifactData.images[0].split('\\').pop().split('/').pop()}`
+                : null;
+
+            const createMesh = (texture) => {
+                const group = new THREE.Group();
+
+                // Main body - stylized book/artifact form
+                const geo = new THREE.BoxGeometry(1.2, 1.6, 0.25, 4, 4, 1);
+                const mat = new THREE.MeshStandardMaterial({
+                    map: texture || null,
+                    color: texture ? 0xffffff : 0x9a8060,
+                    metalness: 0.15,
+                    roughness: 0.6,
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                group.add(mesh);
+
+                // Edge glow
+                const edges = new THREE.EdgesGeometry(geo);
+                const edgeMat = new THREE.LineBasicMaterial({ color: 0x8899ee, transparent: true, opacity: 0.4 });
+                const edgeLines = new THREE.LineSegments(edges, edgeMat);
+                group.add(edgeLines);
+
+                scene.add(group);
+                currentModel = group;
+            };
+
+            if (imgPath) {
+                loader.load(imgPath, (tex) => createMesh(tex), undefined, () => createMesh(null));
+            } else {
+                createMesh(null);
+            }
+        }
+
+        function toggleAutoRotate() {
+            autoRotating = !autoRotating;
+            controls.autoRotate = autoRotating;
+            document.getElementById('rotate-btn').textContent = autoRotating ? '⏸ Pause' : '▶ Rotate';
+        }
+
+        function resetCamera() {
+            camera.position.set(0, 0.5, 3.5);
+            controls.reset();
+            controls.autoRotate = true;
+            autoRotating = true;
+            document.getElementById('rotate-btn').textContent = '⏸ Pause';
+        }
+
+        // ========================
+        // INFO CARDS (bottom admin carousel)
+        // ========================
+        let cards = [];
+
+        let leftPopoutTimer = null;
+        function showPopout(title, text) {
+            let popout = document.getElementById('left-popout');
+            if (!popout) {
+                popout = document.createElement('div');
+                popout.id = 'left-popout';
+                popout.style.position = 'fixed';
+                popout.style.left = '360px'; 
+                popout.style.top = '50%';
+                popout.style.transform = 'translateY(-50%) scale(0.95)';
+                popout.style.width = '280px';
+                popout.style.background = 'rgba(20, 20, 50, 0.95)';
+                popout.style.backdropFilter = 'blur(25px)';
+                popout.style.border = '1px solid rgba(102, 126, 234, 0.6)';
+                popout.style.borderRadius = '16px';
+                popout.style.padding = '20px';
+                popout.style.color = 'white';
+                popout.style.boxShadow = '0 15px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)';
+                popout.style.zIndex = '1000';
+                popout.style.opacity = '0';
+                popout.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                popout.style.pointerEvents = 'none';
+                document.body.appendChild(popout);
+            }
+            
+            popout.innerHTML = `
+                <div style="font-size: 0.7em; color: #667eea; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;">${title}</div>
+                <div style="font-size: 1.05em; line-height: 1.6; color: #e8eaff;">${text}</div>
+            `;
+            
+            popout.offsetHeight; // reflow
+            popout.style.opacity = '1';
+            popout.style.transform = 'translateY(-50%) scale(1)';
+            
+            clearTimeout(leftPopoutTimer);
+            leftPopoutTimer = setTimeout(() => {
+                popout.style.opacity = '0';
+                popout.style.transform = 'translateY(-50%) scale(0.95)';
+            }, 4000);
+        }
+
+        // Populate LEFT panel with artifact metadata
+        function populateLeftPanel(artifact) {
+            const el = document.getElementById('left-panel-inner');
+            const safeText = (text) => (text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            el.innerHTML = `
+                <div class="panel-title">🏺 ${artifact.name || 'Artifact'}</div>
+                <div class="panel-label">Description</div>
+                <div class="panel-value" onclick="showPopout('Description', '${safeText(artifact.description || 'No description available.')}')">${artifact.description || 'No description available.'}</div>
+                <div class="panel-label">Period</div>
+                <div class="panel-value" onclick="showPopout('Period', '${safeText(artifact.period || '—')}')">${artifact.period || '—'}</div>
+                <div class="panel-label">Origin</div>
+                <div class="panel-value" onclick="showPopout('Origin', '${safeText(artifact.origin || '—')}')">${artifact.origin || '—'}</div>
+                <div class="panel-label">Category</div>
+                <div class="panel-value" onclick="showPopout('Category', '${safeText(artifact.category || '—')}')">${artifact.category || '—'}</div>
+                <div class="panel-label">Curator</div>
+                <div class="panel-value" onclick="showPopout('Curator', '${safeText(artifact.curator || 'Museum Staff')}')">${artifact.curator || 'Museum Staff'}</div>
+            `;
+        }
+
+        // Populate RIGHT panel with auto-scrolling images
+        let rightScrollIndex = 0;
+        let rightImages = [];
+        let rightScrollInterval = null;
+
+        function manualScrollRight(dir) {
+            if (!rightImages || rightImages.length === 0) return;
+            if (rightScrollInterval) {
+                clearInterval(rightScrollInterval);
+                rightScrollInterval = null;
+            }
+            rightScrollIndex = (rightScrollIndex + dir + rightImages.length) % rightImages.length;
+            
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                const thumbW = 95; // 80px + 15px gap
+                document.getElementById('right-panel-inner').style.transform = `translateX(-${rightScrollIndex * thumbW}px)`;
+            } else {
+                const thumbH = 250;
+                document.getElementById('right-panel-inner').style.transform = `translateY(-${rightScrollIndex * thumbH}px)`;
+            }
+        }
+
+        function populateRightPanel(artifact) {
+            if (!artifact.images || artifact.images.length === 0) {
+                document.getElementById('right-panel').style.display = 'none';
+                return;
+            }
+            if (artifact.images.length <= 1) {
+                document.getElementById('scroll-up-btn').style.display = 'none';
+                document.getElementById('scroll-down-btn').style.display = 'none';
+            }
+            
+            rightImages = artifact.images;
+            const inner = document.getElementById('right-panel-inner');
+            inner.innerHTML = rightImages.map(img => {
+                const src = `${TRAINING_API}/static/training/${artifact.id}/${img.split('\\').pop().split('/').pop()}`;
+                return `<img class="img-thumb" src="${src}" onclick="window.open(this.src,'_blank')">`;
+            }).join('');
+
+            // Auto scroll every 3s
+            if (rightImages.length > 1) {
+                rightScrollInterval = setInterval(() => {
+                    rightScrollIndex = (rightScrollIndex + 1) % rightImages.length;
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile) {
+                        const thumbW = 95;
+                        document.getElementById('right-panel-inner').style.transform = `translateX(-${rightScrollIndex * thumbW}px)`;
+                    } else {
+                        const thumbH = 250; // 240px + 10px gap
+                        document.getElementById('right-panel-inner').style.transform = `translateY(-${rightScrollIndex * thumbH}px)`;
+                    }
+                }, 3000);
+            }
+        }
+        let currentCardIndex = 0;
+
+        function buildDefaultCards(artifact) {
+            let galleryHtml = '';
+            if (artifact.images && artifact.images.length > 0) {
+                const imgTags = artifact.images.map(img => {
+                    const src = `${TRAINING_API}/static/training/${artifact.id}/${img.split('\\\\').pop().split('/').pop()}`;
+                    return `<div style="flex-shrink: 0; width: 140px; height: 140px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.4)">
+                                <img src="${src}" style="width: 100%; height: 100%; object-fit: cover;" onclick="window.open(this.src, '_blank')">
+                            </div>`;
+                }).join('');
+                galleryHtml = `<div style="display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">${imgTags}</div>
+                <style>#current-card .card-body div::-webkit-scrollbar { height: 6px; } #current-card .card-body div::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.5); border-radius: 10px; }</style>`;
+            }
+
+            return [
+                { icon: '🏺', title: artifact.name, body: artifact.description || 'No description available.', color: '#667eea' },
+                ...(galleryHtml ? [{ icon: '🖼️', title: 'Historical Archives', body: galleryHtml, color: '#4facfe' }] : []),
+                { icon: '📅', title: 'Period', body: `Created around ${artifact.period || 'unknown period'}.`, color: '#764ba2' },
+                { icon: '🌍', title: 'Origin', body: `Originates from ${artifact.origin || 'unknown location'}.`, color: '#e04b8a' },
+                { icon: '🏛️', title: 'Category', body: `Classified as: ${artifact.category || 'Artifact'}.`, color: '#fa8231' },
+                { icon: '👤', title: 'Curator', body: `Curated by ${artifact.curator || 'Museum Staff'}.`, color: '#00b894' },
+            ].filter(c => c.body);
+        }
+
+        function renderCard(idx) {
+            if (!cards || cards.length === 0) {
+                document.getElementById('current-card').innerHTML = `
+            <div class="empty-card">
+                <div style="font-size:28px;margin-bottom:10px">📋</div>
+                <div>No info cards configured.</div>
+                <div style="font-size:12px;margin-top:6px;color:#666">Add cards in the Admin Panel.</div>
+            </div>`;
+                return;
+            }
+
+            const card = cards[idx];
+            const accentColor = card.color || '#667eea';
+            const el = document.getElementById('current-card');
+
+            el.style.setProperty('--card-color', accentColor);
+            el.style.animation = 'none';
+            el.offsetHeight; // reflow
+            el.style.animation = 'cardIn 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+
+            // Dots
+            const dotsHtml = cards.map((_, i) =>
+                `<div class="dot ${i === idx ? 'active' : ''}"></div>`
+            ).join('');
+
+            el.innerHTML = `
+        <div class="card-header">
+            <div class="card-icon">${card.icon || '📌'}</div>
+            <div>
+                <div class="card-title">${card.title}</div>
+                <div class="card-subtitle">Card ${idx + 1} of ${cards.length}</div>
+            </div>
+        </div>
+        <div class="card-body">${card.body}</div>
+        <div class="card-counter">
+            <div class="card-dots">${dotsHtml}</div>
+            <div class="card-nav">
+                <button class="nav-btn" onclick="toggleAutoCards()" id="auto-card-btn" title="Toggle Auto-Play" style="font-size: 12px; font-weight: bold;">⏸</button>
+                <button class="nav-btn" onclick="prevCard()">←</button>
+                <button class="nav-btn" onclick="nextCard()">→</button>
+                <button class="nav-btn" onclick="expandCard(${idx})" title="Read more">⛶</button>
+            </div>
+        </div>`;
+
+            // Re-apply correct play/pause icon state based on global variable
+            if (document.getElementById('auto-card-btn')) {
+                document.getElementById('auto-card-btn').textContent = isAutoCard ? '⏸' : '▶';
+            }
+        }
+
+        let isAutoCard = true;
+        let autoCardInterval = null;
+
+        function toggleAutoCards() {
+            isAutoCard = !isAutoCard;
+            const btn = document.getElementById('auto-card-btn');
+            if (btn) btn.textContent = isAutoCard ? '⏸' : '▶';
+
+            if (isAutoCard) {
+                autoCardInterval = setInterval(nextCard, 5000);
+            } else {
+                clearInterval(autoCardInterval);
+                autoCardInterval = null;
+            }
+        }
+
+        // Start auto play initially
+        setTimeout(() => {
+            if (isAutoCard && !autoCardInterval) {
+                autoCardInterval = setInterval(nextCard, 5000);
+            }
+        }, 3000);
+
+        function nextCard() {
+            if (currentCardIndex < cards.length - 1) {
+                currentCardIndex++;
+            } else {
+                currentCardIndex = 0; // Wrap around to start!
+            }
+            renderCard(currentCardIndex);
+            nudgeModel(1);
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+            } else {
+                currentCardIndex = cards.length - 1; // Wrap around to end!
+            }
+            renderCard(currentCardIndex);
+            nudgeModel(-1);
+        }
+
+        function nudgeModel(dir) {
+            if (!currentModel) return;
+            const target = currentModel.rotation.y + dir * 0.35;
+            const start = currentModel.rotation.y;
+            const duration = 400;
+            const startTime = performance.now();
+            function anim(now) {
+                const t = Math.min((now - startTime) / duration, 1);
+                const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                currentModel.rotation.y = start + (target - start) * ease;
+                if (t < 1) requestAnimationFrame(anim);
+            }
+            requestAnimationFrame(anim);
+        }
+
+        function expandCard(idx) {
+            const card = cards[idx];
+            if (!card) return;
+            const el = document.getElementById('expanded-card-content');
+            el.innerHTML = `
+        <button id="close-expand" onclick="closeExpand()">✕</button>
+        <div class="card-header">
+            <div class="card-icon" style="font-size:44px;width:72px;height:72px;border-radius:18px">${card.icon || '📌'}</div>
+            <div>
+                <div class="card-title" style="font-size:1.4em">${card.title}</div>
+                <div class="card-subtitle">${ARTIFACT_NAME}</div>
+            </div>
+        </div>
+        <div class="card-body" style="font-size:1em;margin-top:16px;line-height:1.75">${card.body}</div>`;
+            document.getElementById('card-expand-overlay').classList.add('open');
+        }
+
+        function closeExpand() {
+            document.getElementById('card-expand-overlay').classList.remove('open');
+        }
+
+        // Swipe and drag support on card panel
+        const cardPanelEl = document.getElementById('card-panel');
+        let touchStartX = 0;
+        let isMouseDragging = false;
+        let mouseStartX = 0;
+        
+        // Touch events
+        cardPanelEl.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+        cardPanelEl.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (dx > 50) prevCard();
+            else if (dx < -50) nextCard();
+        });
+        
+        // Mouse drag events
+        cardPanelEl.addEventListener('mousedown', e => {
+            isMouseDragging = true;
+            mouseStartX = e.pageX;
+            cardPanelEl.style.cursor = 'grabbing';
+            // Disable text selection during drag
+            document.body.style.userSelect = 'none';
+        });
+        
+        window.addEventListener('mouseup', e => {
+            if (!isMouseDragging) return;
+            isMouseDragging = false;
+            cardPanelEl.style.cursor = 'default';
+            document.body.style.userSelect = '';
+            const dx = e.pageX - mouseStartX;
+            if (dx > 60) prevCard();
+            else if (dx < -60) nextCard();
+        });
+        
+        // Prevent default drag behaviors on inner elements
+        cardPanelEl.addEventListener('dragstart', e => e.preventDefault());
+
+        // ========================
+        // ARTIFACT DATA FETCH
+        // ========================
+        // Drawer Support
+        const leftPanel = document.getElementById('left-panel');
+        const drawerHandle = document.getElementById('drawer-handle');
+        let drawerOpen = false;
+
+        function toggleDrawer() {
+            drawerOpen = !drawerOpen;
+            if (drawerOpen) {
+                leftPanel.classList.add('drawer-open');
+            } else {
+                leftPanel.classList.remove('drawer-open');
+            }
+        }
+
+        drawerHandle.addEventListener('click', toggleDrawer);
+        
+        // Touch gesture for drawer
+        let drawerStartY = 0;
+        leftPanel.addEventListener('touchstart', e => {
+            drawerStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        leftPanel.addEventListener('touchend', e => {
+            const dy = e.changedTouches[0].clientY - drawerStartY;
+            if (dy < -40 && !drawerOpen) toggleDrawer(); // Swipe up
+            if (dy > 40 && drawerOpen) toggleDrawer();  // Swipe down
+        }, { passive: true });
+
+        async function init() {
+            document.getElementById('artifact-title').textContent = decodeURIComponent(ARTIFACT_NAME);
+
+            try {
+                // Fetch metadata and model concurrently for speed
+                const fetchPromise = fetch(`${TRAINING_API}/api/artifacts/${ARTIFACT_ID}`).then(r => r.json());
+                
+                const data = await fetchPromise;
+                const artifact = data.success ? data.artifact : {};
+
+                document.getElementById('artifact-title').textContent = artifact.name || ARTIFACT_NAME;
+                document.getElementById('loading-text').textContent = 'Loading 3D Model...';
+
+                // Parallel: Load model while preparing UI
+                const modelPromise = loadModel(artifact);
+
+                // Populate the three panels independently
+                populateLeftPanel(artifact);
+                populateRightPanel(artifact);
+
+                // Bottom carousel = ONLY admin ar_cards
+                const savedCards = artifact.ar_cards || [];
+                if (savedCards.length > 0) {
+                    cards = savedCards;
+                    currentCardIndex = 0;
+                    renderCard(0);
+                } else {
+                    document.getElementById('card-panel').style.display = 'none';
+                }
+
+                // Setup Media
+                const videoEl = document.getElementById('artifact-video');
+                const audioEl = document.getElementById('artifact-audio');
+                const mediaControls = document.getElementById('media-controls');
+                
+                if (artifact.audio_path) {
+                    audioEl.src = `${TRAINING_API}/static/${artifact.audio_path}`;
+                    hasAudio = true;
+                    mediaControls.style.display = 'flex';
+                }
+
+                if (artifact.video_path) {
+                    videoEl.src = `${TRAINING_API}/static/${artifact.video_path}`;
+                    document.getElementById('replay-video-btn').style.display = 'inline-block';
+                    
+                    const overlay = document.getElementById('video-overlay');
+                    overlay.classList.add('active');
+                    
+                    videoEl.onended = () => {
+                        skipVideo();
+                    };
+                    
+                    const playPromise = videoEl.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => {
+                            console.log('Autoplay blocked:', e);
+                            document.getElementById('play-video-btn').style.display = 'inline-block';
+                        });
+                    }
+                } else if (hasAudio) {
+                    const playPromise = audioEl.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => {
+                            console.log('Autoplay blocked:', e);
+                        });
+                    }
+                }
+                
+                await modelPromise; // Wait for model to finalize before hiding loading
+
+            } catch (err) {
+                console.error('Init error:', err);
+                loadFallbackMesh({ images: [] });
+                cards = [{ icon: '⚠️', title: 'Connection Error', body: 'Could not load artifact data.', color: '#ee4444' }];
+                renderCard(0);
+            }
+
+            // Hide loading screen
+            setTimeout(() => {
+                const ls = document.getElementById('loading-screen');
+                ls.style.transition = 'opacity 0.6s ease';
+                ls.style.opacity = '0';
+                setTimeout(() => ls.style.display = 'none', 600);
+            }, 800);
+        }
+
+        let hasAudio = false;
+
+        // --- Custom Media Controls Logic ---
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Setup Audio Controls
+        const audioEl = document.getElementById('artifact-audio');
+        audioEl.addEventListener('timeupdate', () => {
+            const p = (audioEl.currentTime / audioEl.duration) * 100;
+            document.getElementById('audio-progress-fill').style.width = `${p || 0}%`;
+            document.getElementById('audio-time').textContent = formatTime(audioEl.currentTime);
+        });
+        document.getElementById('audio-progress-container').addEventListener('click', (e) => {
+            if (!audioEl.duration) return;
+            const rect = e.target.getBoundingClientRect();
+            audioEl.currentTime = ((e.clientX - rect.left) / rect.width) * audioEl.duration;
+        });
+
+        function toggleAudio() {
+            if (!hasAudio) return;
+            const btn = document.getElementById('custom-audio-play');
+            if (audioEl.paused) {
+                audioEl.play();
+                btn.textContent = '⏸';
+            } else {
+                audioEl.pause();
+                btn.textContent = '▶';
+            }
+        }
+        
+        audioEl.addEventListener('play', () => document.getElementById('custom-audio-play').textContent = '⏸');
+        audioEl.addEventListener('pause', () => document.getElementById('custom-audio-play').textContent = '▶');
+
+        // Setup Video Controls
+        const videoEl = document.getElementById('artifact-video');
+        videoEl.addEventListener('timeupdate', () => {
+            const p = (videoEl.currentTime / videoEl.duration) * 100;
+            document.getElementById('video-progress-fill').style.width = `${p || 0}%`;
+            document.getElementById('video-time').textContent = formatTime(videoEl.currentTime);
+        });
+        document.getElementById('video-progress-container').addEventListener('click', (e) => {
+            if (!videoEl.duration) return;
+            const rect = e.target.getBoundingClientRect();
+            videoEl.currentTime = ((e.clientX - rect.left) / rect.width) * videoEl.duration;
+        });
+
+        function toggleVideo() {
+            const btn = document.getElementById('custom-video-play');
+            if (videoEl.paused) {
+                videoEl.play();
+                btn.textContent = '⏸';
+            } else {
+                videoEl.pause();
+                btn.textContent = '▶';
+            }
+        }
+        
+        videoEl.addEventListener('play', () => document.getElementById('custom-video-play').textContent = '⏸');
+        videoEl.addEventListener('pause', () => document.getElementById('custom-video-play').textContent = '▶');
+        // -----------------------------------
+
+        function playIntroVideo() {
+            const video = document.getElementById('artifact-video');
+            document.getElementById('play-video-btn').style.display = 'none';
+            video.play().catch(e => console.log('Still blocked:', e));
+        }
+
+        function replayVideo() {
+            const video = document.getElementById('artifact-video');
+            const overlay = document.getElementById('video-overlay');
+            const audio = document.getElementById('artifact-audio');
+            
+            // Pause audio if playing
+            if (hasAudio && !audio.paused) {
+                audio.pause();
+            }
+            
+            overlay.classList.add('active');
+            document.getElementById('play-video-btn').style.display = 'none';
+            video.currentTime = 0;
+            video.play().catch(e => {
+                document.getElementById('play-video-btn').style.display = 'inline-block';
+            });
+        }
+
+        function skipVideo() {
+            const video = document.getElementById('artifact-video');
+            const overlay = document.getElementById('video-overlay');
+            video.pause();
+            overlay.classList.remove('active');
+            
+            // Auto-play audio if it exists
+            const audio = document.getElementById('artifact-audio');
+            if (hasAudio) {
+                audio.play().catch(e => {
+                    console.log('Audio autoplay blocked:', e);
+                });
+            }
+        }
+
+        // ========================
+        // ANIMATION LOOP
+        // ========================
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime();
+
+            // Gentle Y bob for model
+            if (currentModel) {
+                currentModel.position.y = Math.sin(elapsed * 0.6) * 0.06;
+            }
+
+            // Ring rotation + pulse
+            ring.rotation.z = elapsed * 0.3;
+            ring.material.opacity = 0.12 + Math.sin(elapsed * 1.2) * 0.06;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ========================
+        // WINDOW RESIZE
+        // ========================
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ========================
+        // LIVE CAMERA AR MODE
+        // ========================
+        let isARMode = false;
+
+        async function toggleARMode() {
+            const video = document.getElementById('ar-video');
+            const particle = document.getElementById('particle-canvas');
+            const btn = document.getElementById('ar-mode-btn');
+
+            if (!isARMode) {
+                // Turn ON AR
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" }
+                    });
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    particle.style.opacity = '0'; // Hide stars
+                    document.body.style.background = 'transparent'; // Remove desktop gradient
+
+                    // Boost lighting to contrast against real-world background
+                    ambientLight.intensity = 1.0;
+                    keyLight.intensity = 2.8;
+
+                    btn.textContent = '❌ Exit AR';
+                    btn.classList.add('active');
+                    isARMode = true;
+                } catch (err) {
+                    alert("Camera access denied or unavailable.");
+                    console.error("Camera error:", err);
+                }
+            } else {
+                // Turn OFF AR
+                const stream = video.srcObject;
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                particle.style.opacity = '1';
+                document.body.style.background = ''; // Automatically falls back to standard CSS rule without overwriting it!
+
+                // Restore lighting
+                ambientLight.intensity = 0.6;
+                keyLight.intensity = 2.5;
+
+                btn.textContent = '📹 AR Mode';
+                btn.classList.remove('active');
+                isARMode = false;
+            }
+        }
+
+        // ========================
+        // START
+        // ========================
+        init();
+        animate();
+    </script>
+</body>
+
+</html>

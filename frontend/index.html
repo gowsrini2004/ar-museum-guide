@@ -107,6 +107,234 @@
             border: 3px dashed rgba(255, 255, 255, 0.5);
             border-radius: 15px;
             pointer-events: none;
+            transition: all 0.3s;
+        }
+
+        .scanning-active .camera-overlay {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+            animation: pulse-border 1.5s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.02);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        .scanning-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(74, 222, 128, 0.9);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            z-index: 10;
+        }
+
+        .scanning-active .scanning-label {
+            display: block;
+        }
+
+        .live-feedback {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .scanning-active .live-feedback {
+            display: block;
+        }
+
+        .feedback-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-pulse {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ade80;
+            animation: pulse-dot 1s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Detection Alert Styling */
+        .detection-alert {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 15px 30px;
+            color: white;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            text-align: center;
+            animation: alert-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 250px;
+        }
+
+        .detection-alert:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translate(-50%, -52%);
+        }
+
+        .detection-alert .artifact-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .detection-alert .click-hint {
+            font-size: 0.8em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            animation: pulse-text 2s infinite;
+        }
+
+        @keyframes alert-pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse-text {
+            0% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.6;
+            }
+        }
+
+        /* Fullscreen styles */
+        .fullscreen-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        #video-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            margin: 0;
+            border-radius: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #video-container:fullscreen #camera-feed {
+            height: 100vh;
+            width: auto;
+            max-width: 100vw;
+            object-fit: cover;
         }
 
         .upload-zone {
@@ -317,6 +545,154 @@
             opacity: 0.8;
         }
 
+        /* ===== Historian AI Q&A Styles ===== */
+        .qa-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .historian-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .historian-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .historian-info h3 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .historian-info small {
+            color: #888;
+            font-size: 0.8em;
+        }
+
+        .qa-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Language Dropdown */
+        .lang-select {
+            padding: 7px 12px;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .lang-select:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* TTS Toggle Switch */
+        .tts-toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f2ff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+
+        .tts-toggle-wrap.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tts-toggle-wrap span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tts-switch {
+            width: 34px;
+            height: 18px;
+            background: #ccc;
+            border-radius: 9px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .tts-toggle-wrap.active .tts-switch {
+            background: #4ade80;
+        }
+
+        .tts-switch::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .tts-toggle-wrap.active .tts-switch::after {
+            transform: translateX(16px);
+        }
+
+        /* Source chip styling */
+        .source-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .source-chip {
+            background: #e8ecff;
+            color: #4a5aad;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .historian-name-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: #764ba2;
+            margin-bottom: 4px;
+        }
+
         .question-input-area {
             display: flex;
             gap: 10px;
@@ -334,6 +710,91 @@
 
         .question-input-area input:focus {
             border-color: #667eea;
+        }
+
+        /* Mic button */
+        .mic-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.25s;
+        }
+
+        .mic-btn:hover {
+            background: #f0f2ff;
+        }
+
+        .mic-btn.listening {
+            background: #ff4444;
+            border-color: #ff4444;
+            color: white;
+            animation: mic-pulse 1s infinite;
+        }
+
+        @keyframes mic-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+            }
+        }
+
+        /* Play button on messages */
+        .msg-play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 14px;
+            padding: 5px 14px;
+            background: transparent;
+            border: 1.5px solid rgba(102, 126, 234, 0.4);
+            border-radius: 20px;
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .msg-play-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .msg-play-btn.playing {
+            background: #e8ecff;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        /* TTS warning toast */
+        .tts-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+            white-space: nowrap;
         }
 
         .suggested-questions {
@@ -412,12 +873,59 @@
                 font-size: 2em;
             }
 
+            .container {
+                padding: 10px;
+            }
+
+            .main-card {
+                padding: 15px;
+                border-radius: 20px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 12px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            #video-container {
+                height: 350px;
+            }
+
             .artifact-info {
                 grid-template-columns: 1fr;
             }
 
             .message {
-                max-width: 90%;
+                max-width: 95%;
+                font-size: 14px;
+            }
+
+            .question-input-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #question-input {
+                width: 100%;
+            }
+
+            .mic-btn, .btn-primary {
+                width: 100%;
+            }
+
+            .admin-link {
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 20px;
+                font-size: 14px;
             }
         }
 
@@ -444,11 +952,76 @@
             margin-bottom: 5px;
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* ===== PREMIUM MOBILE HUD ===== */
+        @media (max-width: 768px) {
+            .scanning-label {
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 12px 24px;
+                border-radius: 40px;
+                font-size: 14px;
+                width: auto;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+
+            .camera-overlay {
+                border-width: 2px;
+                border-radius: 40px;
+                margin: 20px;
+                height: calc(100% - 40px);
+            }
+
+            #video-container {
+                height: 70vh;
+                border-radius: 30px;
+                margin-top: 10px;
+                width: 100%;
+            }
+
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .main-card {
+                padding: 12px;
+                border-radius: 25px;
+                background: rgba(255,255,255,0.05);
+                backdrop-filter: blur(10px);
+            }
+
+            .stats-container {
+                display: none; /* Hide stats on mobile scanner to focus on camera */
+            }
+
+            .question-input-area {
+                padding: 15px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 20px;
+            }
+
+            .detection-alert {
+                position: fixed;
+                bottom: 100px;
+                left: 20px;
+                right: 20px;
+                z-index: 1000;
+                background: white;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            }
+
+            @keyframes popIn {
+                from { transform: scale(0.8) translateY(20px); opacity: 0; }
+                to { transform: scale(1) translateY(0); opacity: 1; }
+            }
+
+            .live-feedback {
+                bottom: 140px;
+            }
         }
     </style>
 </head>
@@ -472,7 +1045,11 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-accuracy">-</div>
-                        <div class="stat-label">Model Accuracy</div>
+                        <div class="stat-label">Peak Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-avg-accuracy">-</div>
+                        <div class="stat-label">Avg. Precision</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-status">Checking...</div>
@@ -485,14 +1062,29 @@
                     <div id="video-container" class="hidden">
                         <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="camera-overlay"></div>
+                        <div class="scanning-label">🔍 Scanning Live...</div>
+
+                        <!-- Fullscreen Toggle -->
+                        <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+
+                        <div class="live-feedback" id="live-feedback">
+                            <div class="feedback-item">
+                                <div class="feedback-pulse"></div>
+                                <span id="feedback-text">Fine-Grained Sensing Active...</span>
+                            </div>
+                        </div>
+
+                        <!-- Detection Pop-up (Interactive) -->
+                        <div id="detection-alert" class="detection-alert hidden" onclick="handleDetectionClick()">
+                            <div class="artifact-title" id="alert-artifact-name">Artifact Found</div>
+                            <div class="click-hint">Click to learn more 🏺</div>
+                        </div>
                     </div>
 
                     <div id="camera-controls">
                         <button id="start-camera-btn" class="btn btn-primary" onclick="startCamera()">📸 Start
-                            Camera</button>
+                            Scanning</button>
                         <div id="active-controls" class="hidden">
-                            <button class="btn btn-primary" id="capture-btn" onclick="captureImage()">✨ Capture &
-                                Recognize</button>
                             <button class="btn btn-secondary" id="stop-camera-btn" onclick="stopCamera()">⏹ Stop
                                 Camera</button>
                         </div>
@@ -544,35 +1136,65 @@
                         </div>
                     </div>
 
-                    <!-- Q&A Section -->
+                    <!-- Q&A Section - Historian AI -->
                     <div class="qa-section" id="qa-section">
                         <div class="qa-header">
-                            <h3>💬 Ask Questions</h3>
-                            <span class="qa-status" id="qa-status">Checking...</span>
+                            <div class="historian-badge">
+                                <div class="historian-avatar">🏛️</div>
+                                <div class="historian-info">
+                                    <h3>Dr. Aryan</h3>
+                                    <small>Distinguished Museum Historian</small>
+                                </div>
+                            </div>
+                            <div class="qa-controls">
+                                <!-- Language Selector -->
+                                <select id="lang-select" class="lang-select" title="Response Language"
+                                    onchange="updateLanguage()">
+                                    <option value="English">🇬🇧 English</option>
+                                    <option value="Tamil">🇮🇳 Tamil</option>
+                                    <option value="Hindi">🇮🇳 Hindi</option>
+                                    <option value="Spanish">🇪🇸 Spanish</option>
+                                    <option value="French">🇫🇷 French</option>
+                                    <option value="German">🇩🇪 German</option>
+                                    <option value="Arabic">🇸🇦 Arabic</option>
+                                    <option value="Japanese">🇯🇵 Japanese</option>
+                                </select>
+                                <!-- TTS Toggle -->
+                                <div id="tts-toggle" class="tts-toggle-wrap" onclick="toggleTTS()">
+                                    <span>🔊 Audio Guide</span>
+                                    <div class="tts-switch"></div>
+                                </div>
+                                <span class="qa-status" id="qa-status">Checking...</span>
+                            </div>
                         </div>
 
                         <div id="qa-available-content" class="hidden">
-                            <div class="suggested-questions" id="suggested-questions"></div>
-
                             <div class="chat-container" id="chat-container"></div>
 
                             <div class="question-input-area">
                                 <input type="text" id="question-input"
-                                    placeholder="Ask a question about this artifact..."
+                                    placeholder="Ask Dr. Aryan about this artifact..."
                                     onkeypress="handleQuestionKeyPress(event)">
+                                <button class="mic-btn" id="mic-btn" onclick="toggleVoiceInput()"
+                                    title="Speak your question">🎤</button>
                                 <button class="btn btn-primary" onclick="askQuestion()">Ask</button>
                             </div>
                         </div>
 
                         <div id="qa-unavailable-content" class="hidden">
                             <p style="text-align: center; color: #666;">
-                                No documents available for this artifact. Upload PDFs in the admin panel to enable Q&A.
+                                No documents available for this artifact. Upload PDFs in the admin panel to enable the
+                                Historian AI.
                             </p>
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin-top: 20px;">
+                    <div
+                        style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="btn btn-secondary" onclick="resetScan()">Scan Another Artifact</button>
+                        <button class="btn btn-primary" onclick="openARViewer()"
+                            style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">🔮 View in 3D
+                            AR</button>
                     </div>
                 </div>
             </div>
@@ -582,8 +1204,21 @@
     <a href="admin_panel.html" class="admin-link">⚙️ Admin Panel</a>
 
     <script>
+        function openARViewer() {
+            if (currentArtifact && currentArtifact.artifact_id) {
+                const url = `ar_viewer.html?id=${currentArtifact.artifact_id}&name=${encodeURIComponent(currentArtifact.artifact_name)}`;
+                window.open(url, '_blank');
+            } else {
+                showTTSToast('Artifact details not fully loaded yet.');
+            }
+        }
+
         let stream = null;
         let currentArtifact = null;
+        let scanInterval = null;
+        let isScanning = false;
+        let recognitionBuffer = [];
+        const BUFFER_SIZE = 3; // Increased for better stability with lower threshold
         const API_BASE = `http://${window.location.hostname}:8000`;
         const QA_API_BASE = `http://${window.location.hostname}:8002`;
         const TRAINING_API_BASE = `http://${window.location.hostname}:8001`;
@@ -605,6 +1240,7 @@
 
                 document.getElementById('stat-artifacts').textContent = health.artifacts_loaded || 0;
                 document.getElementById('stat-accuracy').textContent = stats.last_training_accuracy ? `${Math.round(stats.last_training_accuracy)}%` : 'N/A';
+                document.getElementById('stat-avg-accuracy').textContent = stats.avg_training_accuracy ? `${Math.round(stats.avg_training_accuracy)}%` : 'N/A';
 
                 const statusEl = document.getElementById('stat-status');
                 const startBtn = document.getElementById('start-camera-btn');
@@ -648,6 +1284,9 @@
                 document.getElementById('active-controls').classList.remove('hidden');
                 document.getElementById('system-stats').style.display = 'none';
 
+                // Start Live Scanning
+                startScanning();
+
                 // Ensure capture button is visible if model is ready
                 try {
                     const healthResponse = await fetch(`${API_BASE}/health`);
@@ -679,6 +1318,7 @@
 
         function stopCamera() {
             if (stream) {
+                stopScanning();
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
                 document.getElementById('video-container').classList.add('hidden');
@@ -687,6 +1327,150 @@
                 document.getElementById('start-camera-btn').classList.remove('hidden');
                 document.getElementById('active-controls').classList.add('hidden');
                 document.getElementById('system-stats').style.display = 'grid';
+            }
+        }
+
+        // Live Scanning Logic
+        function startScanning() {
+            if (isScanning) return;
+            isScanning = true;
+            document.getElementById('video-container').classList.add('scanning-active');
+            recognitionBuffer = [];
+
+            scanInterval = setInterval(() => {
+                if (isScanning && !currentArtifact) {
+                    captureForScan();
+                }
+            }, 800); // Scan every 800ms
+        }
+
+        function stopScanning() {
+            isScanning = false;
+            if (scanInterval) {
+                clearInterval(scanInterval);
+                scanInterval = null;
+            }
+            document.getElementById('video-container').classList.remove('scanning-active');
+        }
+
+        function captureForScan() {
+            const video = document.getElementById('camera-feed');
+            if (!video.videoWidth) return;
+
+            const canvas = document.createElement('canvas');
+            const size = Math.min(video.videoWidth, video.videoHeight);
+            canvas.width = 224;
+            canvas.height = 224;
+
+            // Center crop calculation
+            const startX = (video.videoWidth - size) / 2;
+            const startY = (video.videoHeight - size) / 2;
+
+            canvas.getContext('2d').drawImage(video, startX, startY, size, size, 0, 0, 224, 224);
+
+            canvas.toBlob(blob => {
+                if (isScanning) processScan(blob);
+            }, 'image/jpeg', 0.8);
+        }
+
+        async function processScan(imageBlob) {
+            const formData = new FormData();
+            formData.append('file', imageBlob);
+
+            const feedbackEl = document.getElementById('feedback-text');
+            const pulseEl = document.querySelector('.feedback-pulse');
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const confidence = data.prediction.confidence;
+                    const name = data.prediction.artifact_name;
+                    const id = data.prediction.artifact_id;
+
+                    if (confidence > 0.35) {
+                        // Tier 1: High Confidence - show interactive overlay
+                        recognitionBuffer.push(id);
+                        if (recognitionBuffer.length > 5) recognitionBuffer.shift();
+                        const stabilityCount = recognitionBuffer.filter(v => v === id).length;
+
+                        if (feedbackEl) feedbackEl.textContent = `Analyzing Fine Details: ${name}...`;
+                        if (pulseEl) pulseEl.style.background = '#4ade80'; // green
+
+                        if (stabilityCount >= 3) {
+                            showDetectionAlert(data);
+                        }
+                    } else if (confidence > 0.20) {
+                        // Tier 2: Low Confidence - uncertain
+                        recognitionBuffer = [];
+                        if (feedbackEl) feedbackEl.textContent = 'Checking... (Low Confidence)';
+                        if (pulseEl) pulseEl.style.background = '#fbbf24'; // yellow
+                        hideDetectionAlert();
+                    } else {
+                        // Tier 3: Unknown / Unrelated object
+                        recognitionBuffer = [];
+                        if (feedbackEl) feedbackEl.textContent = 'Searching for artifacts...';
+                        if (pulseEl) pulseEl.style.background = '#94a3b8'; // gray
+                        hideDetectionAlert();
+                    }
+                } else {
+                    recognitionBuffer = [];
+                    if (feedbackEl) feedbackEl.textContent = 'Searching...';
+                    if (pulseEl) pulseEl.style.background = '#94a3b8';
+                    hideDetectionAlert();
+                }
+            } catch (error) {
+                console.error('Scan error:', error);
+            }
+        }
+
+        let pendingDetectionData = null;
+
+        function showDetectionAlert(data) {
+            pendingDetectionData = data;
+            const alertEl = document.getElementById('detection-alert');
+            const nameEl = document.getElementById('alert-artifact-name');
+            nameEl.textContent = data.prediction.artifact_name;
+            alertEl.classList.remove('hidden');
+
+            // Pulse the overlay border
+            document.querySelector('.camera-overlay').style.borderColor = '#4ade80';
+        }
+
+        function hideDetectionAlert() {
+            document.getElementById('detection-alert').classList.add('hidden');
+            document.querySelector('.camera-overlay').style.borderColor = 'rgba(255, 255, 255, 0.5)';
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function handleDetectionClick() {
+            if (pendingDetectionData) {
+                stopScanning();
+                hideDetectionAlert();
+
+                // Hide camera interface
+                document.getElementById('camera-mode').classList.add('hidden');
+
+                displayResults(pendingDetectionData);
             }
         }
 
@@ -706,8 +1490,10 @@
 
         // Recognition
         async function recognizeArtifact(imageBlob) {
+            // Manual recognition (if user clicks capture)
+            stopScanning();
+
             // Hide scan interfaces
-            // Hide camera
             document.getElementById('camera-mode').classList.add('hidden');
             document.getElementById('results').style.display = 'none';
             document.getElementById('loading').classList.remove('hidden');
@@ -803,13 +1589,10 @@
                 const data = await response.json();
 
                 if (data.has_documents && data.total_chunks > 0) {
-                    document.getElementById('qa-status').textContent = `${data.total_chunks} chunks available`;
+                    document.getElementById('qa-status').textContent = `Ready`;
                     document.getElementById('qa-status').className = 'qa-status available';
                     document.getElementById('qa-available-content').classList.remove('hidden');
                     document.getElementById('qa-unavailable-content').classList.add('hidden');
-
-                    // Show suggested questions
-                    showSuggestedQuestions();
                 } else {
                     document.getElementById('qa-status').textContent = 'No documents';
                     document.getElementById('qa-status').className = 'qa-status unavailable';
@@ -823,47 +1606,224 @@
             }
         }
 
-        function showSuggestedQuestions() {
-            const questions = [
-                "What is the historical significance of this artifact?",
-                "When was this created?",
-                "What materials were used?",
-                "Tell me more about its origin"
-            ];
+        // ===== Voice Input (Speech Recognition) =====
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
 
-            const container = document.getElementById('suggested-questions');
-            container.innerHTML = '';
+        function toggleVoiceInput() {
+            if (!SpeechRecognition) {
+                showTTSToast('❌ Voice input is not supported in this browser. Use Chrome or Edge.');
+                return;
+            }
 
-            questions.forEach(q => {
-                const btn = document.createElement('button');
-                btn.className = 'suggested-q';
-                btn.textContent = q;
-                btn.onclick = () => {
-                    document.getElementById('question-input').value = q;
-                    askQuestion();
-                };
-                container.appendChild(btn);
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = langCodeMap[selectedLanguage] || 'en';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const micBtn = document.getElementById('mic-btn');
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('listening');
+                micBtn.title = 'Listening... (click to stop)';
+                showTTSToast(`🎤 Listening in ${selectedLanguage}...`);
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('question-input').value = transcript;
+                // Auto-ask after voice input
+                setTimeout(() => askQuestion(), 300);
+            };
+
+            recognition.onerror = (event) => {
+                let msg = '❌ Voice error: ' + event.error;
+                if (event.error === 'no-speech') msg = '⚠️ No speech detected. Try again.';
+                if (event.error === 'not-allowed') msg = '❌ Microphone access denied. Please allow mic in browser settings.';
+                if (event.error === 'language-not-supported') msg = `⚠️ ${selectedLanguage} voice input not supported. Try English.`;
+                showTTSToast(msg);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+                micBtn.title = 'Speak your question';
+            };
+
+            recognition.start();
+        }
+
+        // ===== TTS & Language Controls =====
+        let ttsEnabled = false;
+        let selectedLanguage = 'English';
+        let ttsVoices = [];
+
+        // Language code map for Web Speech API voices
+        const langCodeMap = {
+            'English': 'en', 'Tamil': 'ta', 'Hindi': 'hi',
+            'Spanish': 'es', 'French': 'fr', 'German': 'de',
+            'Arabic': 'ar', 'Japanese': 'ja'
+        };
+
+        // Load voices — they load asynchronously in most browsers
+        function loadVoices() {
+            ttsVoices = window.speechSynthesis.getVoices();
+        }
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            const el = document.getElementById('tts-toggle');
+            el.classList.toggle('active', ttsEnabled);
+            if (!ttsEnabled) window.speechSynthesis.cancel();
+        }
+
+        function updateLanguage() {
+            selectedLanguage = document.getElementById('lang-select').value;
+        }
+
+        let currentPlayingAudio = null;
+        let audioChunks = [];
+        let currentChunkIndex = 0;
+
+        async function speakText(text, btnEl, specificLang = null) {
+            // Stop any current playback
+            stopCurrentAudio();
+
+            const currentSelected = specificLang || document.getElementById('lang-select').value || 'English';
+            const targetCode = langCodeMap[currentSelected] || 'en';
+
+            // Clean text (remove special formatting, extra spaces)
+            const cleanText = text.replace(/[*#]/g, '').trim();
+
+            // Split into chunks of max 200 chars to avoid Google Translate TTS limit
+            // We split by punctuation to keep it natural
+            audioChunks = cleanText.match(/[^.!?]+[.!?]*|.{1,150}(?=\s|$)/g) || [cleanText];
+            currentChunkIndex = 0;
+
+            if (btnEl) {
+                btnEl.textContent = '⏳ Loading...';
+                btnEl.classList.add('playing');
+                // Store stop handler on button
+                btnEl.onclick = () => stopCurrentAudio();
+            }
+
+            console.log(`[TTS] Playing "${selectedLanguage}" via Cloud Engine. Chunks: ${audioChunks.length}`);
+            playNextChunk(targetCode, btnEl);
+        }
+
+        function playNextChunk(langCode, btnEl, specificLang = null) {
+            if (currentChunkIndex >= audioChunks.length) {
+                if (btnEl) {
+                    btnEl.textContent = '▶ Play';
+                    btnEl.classList.remove('playing');
+                    btnEl.onclick = () => {
+                        const savedLang = btnEl.getAttribute('data-lang');
+                        speakText(btnEl.getAttribute('data-text'), btnEl, savedLang);
+                    };
+                }
+                return;
+            }
+
+            const chunk = audioChunks[currentChunkIndex].trim();
+            if (!chunk) {
+                currentChunkIndex++;
+                playNextChunk(langCode, btnEl);
+                return;
+            }
+
+            const QA_API_BASE = `http://${window.location.hostname}:8002`;
+            const url = `${QA_API_BASE}/api/tts?text=${encodeURIComponent(chunk)}&lang=${langCode}`;
+            const audio = new Audio(url);
+            currentPlayingAudio = audio;
+
+            if (btnEl) btnEl.textContent = '⏹ Stop';
+
+            audio.onended = () => {
+                currentChunkIndex++;
+                const savedLang = btnEl ? btnEl.getAttribute('data-lang') : null;
+                playNextChunk(langCode, btnEl, savedLang);
+            };
+
+            audio.onerror = (e) => {
+                console.error("[TTS] Audio Error:", e);
+                showTTSToast('❌ Audio playback failed. Check connection.');
+                if (btnEl) {
+                    btnEl.textContent = '▶ Play';
+                    btnEl.classList.remove('playing');
+                }
+            };
+
+            audio.play().catch(err => {
+                console.error("[TTS] Play Error:", err);
+                if (btnEl) {
+                    btnEl.textContent = '▶ Play';
+                    btnEl.classList.remove('playing');
+                }
             });
         }
 
-        function handleQuestionKeyPress(event) {
-            if (event.key === 'Enter') {
-                askQuestion();
+        function stopCurrentAudio() {
+            if (currentPlayingAudio) {
+                currentPlayingAudio.onerror = null; // Detach network error hook before aborting stream to prevent DOMException toast
+                currentPlayingAudio.pause();
+                currentPlayingAudio.src = '';
+                currentPlayingAudio = null;
             }
+            audioChunks = [];
+            currentChunkIndex = 0;
+
+            // Revert all play buttons to "Play"
+            document.querySelectorAll('.msg-play-btn').forEach(btn => {
+                btn.textContent = '▶ Play';
+                btn.classList.remove('playing');
+                // Re-bind to original speakText call (stored in data-text)
+                const text = btn.getAttribute('data-text');
+                const lang = btn.getAttribute('data-lang');
+                if (text) btn.onclick = () => {
+                    if (btn.classList.contains('playing')) stopCurrentAudio();
+                    else speakText(text, btn, lang);
+                };
+            });
+        }
+
+        function debugVoices() {
+            showTTSToast("Cloud Audio Migration Complete! System voices are no longer required.");
+        }
+
+        function showTTSToast(msg) {
+            const existing = document.querySelector('.tts-toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'tts-toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function handleQuestionKeyPress(event) {
+            if (event.key === 'Enter') askQuestion();
         }
 
         async function askQuestion() {
             const input = document.getElementById('question-input');
             const question = input.value.trim();
-
             if (!question) return;
 
-            // Add user message
             addMessage(question, 'user');
             input.value = '';
 
-            // Add loading message
-            const loadingMsg = addMessage('Thinking...', 'assistant');
+            const loadingMsg = addMessage('Dr. Aryan is consulting the archives...', 'assistant', null, true);
 
             try {
                 const response = await fetch(`${QA_API_BASE}/api/ask`, {
@@ -872,39 +1832,63 @@
                     body: JSON.stringify({
                         artifact_id: currentArtifact.artifact_id,
                         artifact_name: currentArtifact.artifact_name,
-                        question: question
+                        question: question,
+                        target_language: selectedLanguage
                     })
                 });
 
                 const data = await response.json();
-
-                // Remove loading message
                 loadingMsg.remove();
 
-                // Add assistant response
                 if (data.success) {
-                    const sources = data.sources.map(s => `Page ${s.page}`).join(', ');
-                    addMessage(data.answer, 'assistant', sources ? `Sources: ${sources}` : null);
+                    const sourceChips = data.sources.map(s =>
+                        `<span class="source-chip">📄 ${s.filename || 'Document'} &nbsp;·&nbsp; Pg. ${s.page}</span>`
+                    ).join('');
+                    const msgEl = addMessage(data.answer, 'assistant', sourceChips ? `<div class="source-chips">${sourceChips}</div>` : null, false, selectedLanguage);
+                    // Auto-play if TTS is enabled
+                    if (ttsEnabled) {
+                        const playBtn = msgEl.querySelector('.msg-play-btn');
+                        speakText(data.answer, playBtn, selectedLanguage);
+                    }
                 } else {
-                    addMessage(data.answer || 'Sorry, I couldn\'t answer that question.', 'assistant');
+                    addMessage(data.answer || 'The historical records are unclear on this matter.', 'assistant');
                 }
             } catch (error) {
                 loadingMsg.remove();
-                addMessage('Error: ' + error.message, 'assistant');
+                addMessage('A connection error occurred. Please try again.', 'assistant');
             }
         }
 
-        function addMessage(text, type, sources = null) {
+        function addMessage(text, type, sourcesHtml = null, isLoading = false, msgLangData = null) {
             const container = document.getElementById('chat-container');
             const msg = document.createElement('div');
             msg.className = `message ${type}`;
-            msg.innerHTML = text;
 
-            if (sources) {
-                const sourcesDiv = document.createElement('div');
-                sourcesDiv.className = 'sources';
-                sourcesDiv.textContent = sources;
-                msg.appendChild(sourcesDiv);
+            if (type === 'assistant' && !isLoading) {
+                msg.innerHTML = `<div class="historian-name-tag">🏛️ Dr. Aryan</div>${text}`;
+                // Add per-message play button
+                const playBtn = document.createElement('button');
+                playBtn.className = 'msg-play-btn';
+                playBtn.textContent = '▶ Play';
+                playBtn.setAttribute('data-text', text); // Required so stopCurrentAudio can restore functionality
+                if (msgLangData) playBtn.setAttribute('data-lang', msgLangData);
+                playBtn.onclick = () => {
+                    if (playBtn.classList.contains('playing')) {
+                        stopCurrentAudio();
+                    } else {
+                        const savedLang = playBtn.getAttribute('data-lang');
+                        speakText(text, playBtn, savedLang);
+                    }
+                };
+                msg.appendChild(playBtn);
+            } else {
+                msg.innerHTML = text;
+            }
+
+            if (sourcesHtml) {
+                const sourcesEl = document.createElement('div');
+                sourcesEl.innerHTML = sourcesHtml;
+                msg.appendChild(sourcesEl);
             }
 
             container.appendChild(msg);
@@ -917,7 +1901,12 @@
             document.getElementById('camera-mode').classList.remove('hidden');
             document.getElementById('chat-container').innerHTML = '';
             document.getElementById('confidence-fill').style.width = '0%';
+            window.speechSynthesis && window.speechSynthesis.cancel();
             currentArtifact = null;
+            pendingDetectionData = null;
+            hideDetectionAlert();
+
+            if (stream) startScanning();
         }
     </script>
 </body>

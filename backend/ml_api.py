@@ -1,5 +1,5 @@
 """
-ML-based API server that uses the trained ResNet50 model for artifact recognition
+ML-based API server that uses the trained ConvNeXt-Base model for artifact recognition
 """
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,40 +46,72 @@ def load_artifacts():
     return []
 
 def load_model():
-    """Load the trained model"""
+    """Load the trained model with Fine-Grained architecture"""
+    global model, class_mapping
+    
     if not MODEL_PATH.exists():
+        print(f"[WARN] No model at {MODEL_PATH}")
         return None, None
     
-    # Load class mapping
-    with open(CLASS_MAPPING_PATH, 'r') as f:
-        class_mapping = json.load(f)
-    
-    # Create model architecture
-    model = models.resnet50(pretrained=False)
-    num_features = model.fc.in_features
-    model.fc = nn.Linear(num_features, len(class_mapping))
-    
-    # Load trained weights
-    with open(MODEL_PATH, 'rb') as f:
-        model.load_state_dict(torch.load(f, map_location=torch.device('cpu')))
-    model.eval()
-    
-    return model, class_mapping
+    try:
+        # Load the checkpoint (dictionary)
+        checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+        
+        # Handle both old and new formats
+        if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+            state_dict = checkpoint['model_state_dict']
+            mapping = checkpoint.get('classes', [])
+            # Convert list to mapping if needed
+            if isinstance(mapping, list):
+                mapping = {str(i): name for i, name in enumerate(mapping)}
+        else:
+            state_dict = checkpoint
+            # Fallback to separate mapping file
+            if CLASS_MAPPING_PATH.exists():
+                with open(CLASS_MAPPING_PATH, 'r') as f:
+                    mapping = json.load(f)
+            else:
+                mapping = {}
+
+        # Create model architecture - ConvNeXt-Base
+        tmp_model = models.convnext_base(weights=None)
+        num_features = tmp_model.classifier[2].in_features
+        
+        # Reconstruct head with Dropout (matches train_model.py)
+        tmp_model.classifier = nn.Sequential(
+            tmp_model.classifier[0], # LayerNorm2d
+            tmp_model.classifier[1], # Flatten
+            nn.Dropout(p=0.3),
+            nn.Linear(num_features, len(mapping))
+        )
+        
+        # Load weights
+        tmp_model.load_state_dict(state_dict)
+        tmp_model.eval()
+        
+        print(f"[OK] High-Precision Model loaded with {len(mapping)} classes")
+        return tmp_model, mapping
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to load model: {e}")
+        import traceback
+        traceback.print_exc()
+        return None, None
 
 # Load on startup
 artifacts = load_artifacts()
 model, class_mapping = load_model()
 
 if model is not None:
-    print(f"✅ Loaded trained model with {len(class_mapping)} classes")
+    print(f"[OK] Loaded trained model with {len(class_mapping)} classes")
 else:
-    print("⚠️  No trained model found. Please train the model first.")
+    print("[WARN] No trained model found. Please train the model first.")
 
-print(f"✅ Loaded {len(artifacts)} artifacts")
+print(f"[OK] Loaded {len(artifacts)} artifacts")
 
-# Image preprocessing
+# Image preprocessing - Enhanced for Fine-Grained Recognition
 transform = transforms.Compose([
-    transforms.Resize(256),
+    transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -98,6 +130,27 @@ async def root():
             "/health": "GET - Health check"
         }
     }
+
+
+@app.post("/reload")
+async def reload_model():
+    """Reload model and artifacts from disk (call after retraining)"""
+    global model, class_mapping, artifacts
+    try:
+        old_classes = len(class_mapping) if class_mapping else 0
+        model, class_mapping = load_model()
+        artifacts = load_artifacts()
+        new_classes = len(class_mapping) if class_mapping else 0
+        print(f"[RELOAD] Model reloaded: {old_classes} -> {new_classes} classes")
+        return JSONResponse({
+            "success": True,
+            "message": f"Model reloaded successfully with {new_classes} classes",
+            "num_classes": new_classes,
+            "num_artifacts": len(artifacts)
+        })
+    except Exception as e:
+        print(f"[RELOAD ERROR] {e}")
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
 
 
 @app.post("/predict")
@@ -141,6 +194,7 @@ async def predict_artifact(file: UploadFile = File(...)):
         
         # Get predicted class name
         predicted_class = class_mapping[str(predicted_idx)]
+        print(f"[PREDICT] Class: {predicted_class}, Confidence: {confidence:.4f}")
         
         # Find matching artifact
         matching_artifact = None
@@ -178,7 +232,7 @@ async def predict_artifact(file: UploadFile = File(...)):
                 "origin": matching_artifact["origin"],
                 "description": matching_artifact["description"],
                 "confidence": confidence,
-                "model": "ResNet50 (Trained)"
+                "model": "ConvNeXt-Base (Advanced)"
             },
             "top_3_predictions": top_predictions,
             "explanation": matching_artifact["description"],
@@ -211,19 +265,19 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     print(f"""
-╔══════════════════════════════════════════════════════════╗
-║     AR Museum Guide - ML API Server                     ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+      AR Museum Guide - ML API Server                     
+============================================================
 
-🌐 API: http://localhost:8000
-📚 Artifacts loaded: {len(artifacts)}
-🤖 Model: {'Trained ✅' if model else 'Not trained ❌'}
+API: http://localhost:8000
+Artifacts loaded: {len(artifacts)}
+Model: {'Trained [OK]' if model else 'Not trained [X]'}
 
 Endpoints:
   - POST /predict - Upload image for recognition
   - GET /health - Check status
 
-🎯 Using trained ResNet50 model for real artifact recognition!
+[!] Using advanced ConvNeXt-Base model for high-fidelity artifact recognition!
 
 Press Ctrl+C to stop
 """)

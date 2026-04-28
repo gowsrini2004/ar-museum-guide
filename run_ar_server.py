@@ -27,34 +27,34 @@ def run_server(port=8080):
     httpd = HTTPServer(server_address, CORSRequestHandler)
     
     print(f"""
-╔══════════════════════════════════════════════════════════╗
-║          AR Museum Guide - Mobile Demo Server           ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+           AR Museum Guide - Mobile Demo Server           
+============================================================
 
-🌐 Server running at:
-   - Local: http://localhost:{port}/ar_mobile_demo.html
+Server running at:
+   - Local: http://localhost:{port}/index.html
    
-📱 To access on your phone:
+To access on your phone:
    1. Make sure your phone is on the SAME WiFi network
    2. Find your computer's IP address:
       - Windows: Run 'ipconfig' and look for IPv4 Address
       - Mac/Linux: Run 'ifconfig' or 'ip addr'
-   3. Open on phone: http://YOUR_IP:{port}/ar_mobile_demo.html
+   3. Open on phone: http://YOUR_IP:{port}/index.html
    
-   Example: http://192.168.1.5:{port}/ar_mobile_demo.html
-
-⚠️  Important:
-   - Allow camera permissions when prompted
-   - Works best in good lighting
-   - Point camera at any object to see AR overlay
-
-Press Ctrl+C to stop the server
-""")
+   Example: http://192.168.1.5:{port}/index.html
+ 
+ Important:
+    - Allow camera permissions when prompted
+    - Works best in good lighting
+    - Point camera at any object to see AR overlay
+ 
+ Press Ctrl+C to stop the server
+ """)
     
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\n\n✅ Server stopped")
+        print("\n\n [OK] Server stopped")
         httpd.shutdown()
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ def load_artifacts():
     return []
 
 artifacts = load_artifacts()
-print(f"✅ Loaded {len(artifacts)} artifacts")
+print(f"[OK] Loaded {len(artifacts)} artifacts")
 
 
 @app.get("/")
@@ -116,18 +116,18 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     print(f"""
-╔══════════════════════════════════════════════════════════╗
-║     AR Museum Guide - Simple API Server                 ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+      AR Museum Guide - Simple API Server                 
+============================================================
 
-🌐 API: http://localhost:8000
-📚 Artifacts loaded: {len(artifacts)}
+API: http://localhost:8000
+Artifacts loaded: {len(artifacts)}
 
 Endpoints:
   - POST /predict - Upload image for recognition
   - GET /health - Check status
 
-⚠️  Note: Using simple demo mode (not real ML yet)
+[!] Note: Using simple demo mode (not real ML yet)
    Your artifacts will be recognized randomly for testing
 
 Press Ctrl+C to stop

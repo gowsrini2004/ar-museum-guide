@@ -1,5 +1,5 @@
 """
-Model training script for fine-tuning ResNet50 on custom artifacts
+Model training script for fine-tuning ConvNeXt-Base on custom artifacts
 """
 import torch
 import torch.nn as nn
@@ -8,93 +8,117 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
 from pathlib import Path
 import json
+from datetime import datetime
 
 
-def train_artifact_model(data_dir, num_epochs=10, batch_size=8, learning_rate=0.001):
+def train_artifact_model(data_dir, num_epochs=15, batch_size=4, learning_rate=0.0001, progress_callback=None):
     """
-    Train ResNet50 on custom artifact dataset
-    
-    Args:
-        data_dir: Path to training data directory
-        num_epochs: Number of training epochs
-        batch_size: Batch size for training
-        learning_rate: Learning rate
-        
-    Returns:
-        Dictionary with training results
+    Train ConvNeXt-Base on custom artifact dataset with Feature Caching
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on: {device}")
     
-    # Data transforms
-    transform = transforms.Compose([
-        transforms.Resize(256),
+    # Progress file path
+    progress_file = Path(__file__).parent.parent / "data" / "training_progress.json"
+    
+    def update_progress(epoch, total_epochs, status="training", accuracy=0.0, loss=0.0):
+        progress = {
+            "epoch": epoch,
+            "total_epochs": total_epochs,
+            "status": status,
+            "accuracy": round(accuracy, 2),
+            "loss": round(loss, 4),
+            "percent": int(((epoch) / total_epochs) * 100) if total_epochs > 0 else 0,
+            "timestamp": datetime.now().isoformat()
+        }
+        with open(progress_file, 'w') as f:
+            json.dump(progress, f)
+        if progress_callback:
+            progress_callback(progress)
+
+    # Initial progress
+    update_progress(0, num_epochs, status="loading_data")
+
+    # Data transforms with Advanced Augmentation
+    train_transform = transforms.Compose([
+        transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
         transforms.CenterCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(15),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
     
-    # Load dataset
-    dataset = datasets.ImageFolder(data_dir, transform=transform)
+    val_transform = transforms.Compose([
+        transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
     
-    if len(dataset.classes) < 2:
+    # Load dataset (will split later)
+    # Note: We'll use train_transform by default and override for validation
+    full_dataset = datasets.ImageFolder(data_dir, transform=train_transform)
+    if len(full_dataset.classes) < 2:
         raise ValueError("Need at least 2 artifact classes to train")
     
-    print(f"Found {len(dataset.classes)} artifact classes:")
-    for idx, class_name in enumerate(dataset.classes):
-        print(f"  {idx}: {class_name}")
+    # Load pre-trained ConvNeXt-Base
+    update_progress(0, num_epochs, status="building_model")
+    model = models.convnext_base(weights=models.ConvNeXt_Base_Weights.IMAGENET1K_V1)
+    
+    # Fine-Tuning Strategy: 
+    # 1. Freeze everything first
+    for param in model.parameters():
+        param.requires_grad = False
+        
+    # 2. Unfreeze the last layer of features for "Fine-Grained" adaptation
+    # ConvNeXt_Base.features is a Sequential(0..7). Block 7 is the final stage.
+    for param in model.features[7].parameters():
+        param.requires_grad = True
+    
+    # 3. Rebuild classifier head with Dropout for accuracy/robustness
+    num_features = model.classifier[2].in_features
+    model.classifier = nn.Sequential(
+        model.classifier[0], # LayerNorm2d
+        model.classifier[1], # Flatten
+        nn.Dropout(p=0.3),   # Prevent overfitting
+        nn.Linear(num_features, len(full_dataset.classes))
+    )
+    
+    model.to(device)
     
     # Split into train/val
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_size = int(0.85 * len(full_dataset))
+    val_size = len(full_dataset) - train_size
+    train_ds, val_ds = torch.utils.data.random_split(full_dataset, [train_size, val_size])
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    # Apply validation transform to val_ds
+    val_ds.dataset.transform = val_transform
     
-    print(f"Training samples: {train_size}, Validation samples: {val_size}")
-    
-    # Load pre-trained ResNet50
-    model = models.resnet50(pretrained=True)
-    
-    # Freeze early layers
-    for param in list(model.parameters())[:-20]:
-        param.requires_grad = False
-    
-    # Replace final layer
-    num_features = model.fc.in_features
-    model.fc = nn.Linear(num_features, len(dataset.classes))
-    model = model.to(device)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
     
     # Loss and optimizer
+    # Use different learning rates for backbone vs head
+    params = [
+        {'params': model.features[7].parameters(), 'lr': learning_rate * 0.1},
+        {'params': model.classifier.parameters(), 'lr': learning_rate}
+    ]
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate)
+    optimizer = optim.AdamW(params, weight_decay=1e-2)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
     
-    # Training loop
+    # Training Loop
     best_acc = 0.0
-    history = {
-        'train_loss': [],
-        'train_acc': [],
-        'val_loss': [],
-        'val_acc': []
-    }
+    history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
     
     for epoch in range(num_epochs):
-        print(f"\nEpoch {epoch+1}/{num_epochs}")
-        print("-" * 40)
-        
-        # Training phase
         model.train()
-        train_loss = 0.0
-        train_correct = 0
-        train_total = 0
+        train_loss, train_correct, train_total = 0.0, 0, 0
         
-        for images, labels in train_loader:
+        for i, (images, labels) in enumerate(train_loader):
             images, labels = images.to(device), labels.to(device)
-            
             optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -105,16 +129,16 @@ def train_artifact_model(data_dir, num_epochs=10, batch_size=8, learning_rate=0.
             _, predicted = outputs.max(1)
             train_total += labels.size(0)
             train_correct += predicted.eq(labels).sum().item()
+            
+            if i % 10 == 0:
+                print(f"Epoch {epoch+1}/{num_epochs} Batch {i}/{len(train_loader)} Loss: {loss.item():.4f}")
         
-        train_loss = train_loss / len(train_loader)
+        scheduler.step()
         train_acc = 100. * train_correct / train_total
         
-        # Validation phase
+        # Validation
         model.eval()
-        val_loss = 0.0
-        val_correct = 0
-        val_total = 0
-        
+        val_loss, val_correct, val_total = 0.0, 0, 0
         with torch.no_grad():
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
@@ -126,42 +150,41 @@ def train_artifact_model(data_dir, num_epochs=10, batch_size=8, learning_rate=0.
                 val_total += labels.size(0)
                 val_correct += predicted.eq(labels).sum().item()
         
-        val_loss = val_loss / len(val_loader)
         val_acc = 100. * val_correct / val_total
         
-        # Save history
-        history['train_loss'].append(train_loss)
+        # Save history and report progress
+        update_progress(epoch + 1, num_epochs, status="training", accuracy=val_acc, loss=val_loss)
+        
+        history['train_loss'].append(train_loss / len(train_loader))
         history['train_acc'].append(train_acc)
-        history['val_loss'].append(val_loss)
+        history['val_loss'].append(val_loss / len(val_loader))
         history['val_acc'].append(val_acc)
         
-        print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}%")
-        print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}%")
+        print(f"Epoch {epoch+1}/{num_epochs} - Val Acc: {val_acc:.2f}%")
         
-        # Save best model
         if val_acc > best_acc:
             best_acc = val_acc
-            model_dir = Path(__file__).parent.parent / "models"
-            model_dir.mkdir(exist_ok=True)
-            model_path = model_dir / "artifact_model.pth"
-            torch.save(model.state_dict(), model_path)
-            print(f"✅ Saved best model (acc: {best_acc:.2f}%)")
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'class_to_idx': full_dataset.class_to_idx,
+                'classes': full_dataset.classes
+            }, Path(__file__).parent.parent / "models" / "artifact_model.pth")
+            
+            # Save class mapping separately for ML API
+            with open(Path(__file__).parent.parent / "models" / "class_mapping.json", 'w') as f:
+                json.dump({v: k for k, v in full_dataset.class_to_idx.items()}, f, indent=2)
     
-    # Save class mapping
-    class_mapping = {idx: class_name for idx, class_name in enumerate(dataset.classes)}
-    mapping_path = Path(__file__).parent.parent / "models" / "class_mapping.json"
-    with open(mapping_path, 'w') as f:
-        json.dump(class_mapping, f, indent=2)
+    # Final cleanup
+    update_progress(num_epochs, num_epochs, status="completed", accuracy=best_acc)
     
-    print(f"\n{'='*40}")
-    print(f"Training Complete!")
-    print(f"Best Validation Accuracy: {best_acc:.2f}%")
-    print(f"Model saved to: {model_path}")
-    print(f"{'='*40}")
+    print(f"\nTraining Complete! Best Accuracy: {best_acc:.2f}%")
+    
+    avg_acc = sum(history['val_acc']) / len(history['val_acc']) if history['val_acc'] else 0.0
     
     return {
         "best_accuracy": best_acc,
-        "num_classes": len(dataset.classes),
+        "avg_accuracy": avg_acc,
+        "num_classes": len(full_dataset.classes),
         "num_epochs": num_epochs,
         "history": history
     }
@@ -172,7 +195,7 @@ if __name__ == "__main__":
     data_dir = Path(__file__).parent.parent / "data" / "training"
     
     if not data_dir.exists() or len(list(data_dir.iterdir())) < 2:
-        print("❌ Error: Need at least 2 artifact folders in data/training/")
+        print("[ERR] Error: Need at least 2 artifact folders in data/training/")
         print("\nExpected structure:")
         print("data/training/")
         print("  artifact_1/")
@@ -183,4 +206,4 @@ if __name__ == "__main__":
         print("    ...")
     else:
         results = train_artifact_model(str(data_dir))
-        print(f"\n✅ Training completed with {results['best_accuracy']:.2f}% accuracy")
+        print(f"\n[OK] Training completed with {results['best_accuracy']:.2f}% accuracy")

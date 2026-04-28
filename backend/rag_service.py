@@ -171,9 +171,9 @@ class RAGService:
             print(f"Error creating embeddings: {e}")
             return False
     
-    def query_artifact(self, artifact_id: str, question: str, artifact_name: str = "") -> Dict[str, any]:
+    def query_artifact(self, artifact_id: str, question: str, artifact_name: str = "", target_language: str = "English") -> Dict[str, any]:
         """
-        Query the artifact's documents and generate an answer using Gemini
+        Query the artifact's documents and generate a Historian AI answer using Gemini
         """
         try:
             collection_name = f"artifact_{artifact_id}"
@@ -208,9 +208,11 @@ class RAGService:
             relevant_chunks = results['documents'][0]
             metadatas = results['metadatas'][0]
             
-            # Build context from retrieved chunks
-            context = "\n\n".join([f"[Page {meta['page_number']}]: {chunk}" 
-                                   for chunk, meta in zip(relevant_chunks, metadatas)])
+            # Build context from retrieved chunks, including document filenames
+            context = "\n\n".join([
+                f"[Source: {meta.get('filename', 'Unknown')}, Page {meta['page_number']}]: {chunk}"
+                for chunk, meta in zip(relevant_chunks, metadatas)
+            ])
             
             # Generate answer using Gemini
             if not self.client:
@@ -220,23 +222,33 @@ class RAGService:
                     'sources': []
                 }
             
-            prompt = f"""You are a knowledgeable museum guide assistant. Answer the question about the artifact based on the provided context.
+            language_instruction = (
+                f"Respond ENTIRELY in {target_language}. Translate all text including citations."
+                if target_language.lower() not in ["english", "en"]
+                else "Respond in clear, academic English."
+            )
+
+            prompt = f"""You are Dr. Aryan, a Distinguished Museum Historian with 30 years of expertise in cultural heritage, archaeology, and ancient civilizations. You speak with the authoritative yet engaging voice of a seasoned academic who has devoted their life to uncovering the stories behind museum artifacts.
+
+Your task: Answer the visitor's question about the artifact "{artifact_name}" based strictly on the scholarly documents provided. Frame your answer as a historian would — contextualizing the artifact within its historical period, cultural significance, and material culture. Use rich, evocative language that brings history to life.
+
+{language_instruction}
 
 Artifact: {artifact_name}
 
-Context from documents:
+Scholarly Context (from research documents):
 {context}
 
-Question: {question}
+Visitor's Question: {question}
 
-Instructions:
-- Answer the question based ONLY on the provided context
-- Be informative and engaging
-- If the context doesn't contain enough information to answer, say so
-- Keep your answer concise but complete
-- Cite page numbers when relevant
+Historian's Guidelines:
+- Draw ONLY from the provided scholarly context above
+- Write in the first person as a distinguished historian (e.g., "In my years of study...", "Historical records indicate...")
+- Do NOT mention document filenames or page numbers in your response — citations are shown separately in the interface
+- If the context is insufficient, say so in a scholarly way.
+- Be EXTREMELY concise and direct. Aim for 1-2 VERY short sentences. Maximum 30 words. Do not ramble.
 
-Answer:"""
+Historian's Answer:"""
             
             response = self.client.models.generate_content(
                 model=self.model_id,
@@ -244,17 +256,18 @@ Answer:"""
             )
             answer = response.text
             
-            # Format sources
+            # Format sources with filename and page number
             sources = []
-            seen_pages = set()
+            seen = set()
             for meta in metadatas:
-                page_num = meta['page_number']
-                if page_num not in seen_pages:
+                key = (meta.get('filename', ''), meta['page_number'])
+                if key not in seen:
                     sources.append({
-                        'page': page_num,
+                        'page': meta['page_number'],
+                        'filename': meta.get('filename', 'Unknown Document'),
                         'document_id': meta['document_id']
                     })
-                    seen_pages.add(page_num)
+                    seen.add(key)
             
             return {
                 'success': True,

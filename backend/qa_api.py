@@ -4,16 +4,20 @@ Handles user questions about artifacts using RAG
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from pathlib import Path
 import os
+import io
 from dotenv import load_dotenv
+import edge_tts
 
 # Load environment variables
 load_dotenv()
 
 # Import RAG service
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from rag_service import get_rag_service
 
 app = FastAPI(title="AR Museum Guide - Q&A API")
@@ -37,6 +41,7 @@ class QuestionRequest(BaseModel):
     artifact_id: str
     artifact_name: str
     question: str
+    target_language: str = "English"  # Default: English
 
 
 @app.post("/api/ask")
@@ -48,17 +53,57 @@ async def ask_question(request: QuestionRequest):
         result = rag_service.query_artifact(
             artifact_id=request.artifact_id,
             question=request.question,
-            artifact_name=request.artifact_name
+            artifact_name=request.artifact_name,
+            target_language=request.target_language
         )
         
         return JSONResponse(result)
     
     except Exception as e:
+        error_msg = str(e)
+        if '503' in error_msg or 'UNAVAILABLE' in error_msg:
+            friendly_answer = "Dr. Aryan is currently occupied with a large group of museum visitors! Please try asking your question again in a few moments."
+        else:
+            friendly_answer = f"The historical records are unclear at this moment. ({error_msg})"
+            
         return JSONResponse({
             "success": False,
-            "answer": f"An error occurred: {str(e)}",
+            "answer": friendly_answer,
             "sources": []
-        }, status_code=500)
+        })
+
+
+@app.get("/api/tts")
+async def generate_speech(text: str, lang: str = "en"):
+    """
+    Server-side Text-To-Speech synthesis.
+    Bypasses modern browser origin/CORS media restrictions by streaming the MP3 natively from Azure Cognitive Services (Edge TTS).
+    """
+    try:
+        # High quality Azure Neural voices tailored for the museum experience
+        edge_voices = {
+            'en': 'en-US-AriaNeural',      # Natural English
+            'ta': 'ta-IN-PallaviNeural',   # Authentic Tamil
+            'hi': 'hi-IN-SwaraNeural',     # Fluent Hindi
+            'es': 'es-ES-ElviraNeural',
+            'fr': 'fr-FR-DeniseNeural',
+            'de': 'de-DE-KatjaNeural',
+            'ar': 'ar-EG-SalmaNeural',
+            'ja': 'ja-JP-NanamiNeural'
+        }
+        
+        voice = edge_voices.get(lang.lower(), 'en-US-AriaNeural')
+        
+        communicate = edge_tts.Communicate(text, voice)
+        
+        async def audio_stream():
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    yield chunk["data"]
+                    
+        return StreamingResponse(audio_stream(), media_type="audio/mpeg")
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 @app.get("/api/health")
@@ -115,12 +160,12 @@ async def list_artifact_documents(artifact_id: str):
 if __name__ == "__main__":
     import uvicorn
     print("""
-╔══════════════════════════════════════════════════════════╗
-║     AR Museum Guide - Q&A API Server                    ║
-╚══════════════════════════════════════════════════════════╝
+============================================================
+      AR Museum Guide - Q&A API Server                    
+============================================================
 
-🌐 API: http://localhost:8002
-🤖 Powered by: Google Gemini + ChromaDB
+API: http://localhost:8002
+[!] Powered by: Google Gemini + ChromaDB
 
 Endpoints:
   - POST /api/ask - Ask a question about an artifact

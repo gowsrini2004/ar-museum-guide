@@ -820,13 +820,15 @@
 
     <!-- Top Bar -->
     <div id="top-bar">
-        <a id="back-btn" href="javascript:void(0)"
-            onclick="if(window.history.length > 2) { history.back(); } else { window.close(); }">←</a>
+        <a id="back-btn" href="gallery.html">←</a>
         <div style="flex:1">
             <div id="artifact-title">Loading...</div>
             <span id="artifact-subtitle">AR 3D Museum Experience</span>
         </div>
         <div id="ar-buttons">
+            <a href="index.html" class="top-btn" style="text-decoration: none; display: flex; align-items: center; gap: 5px; margin-right: 10px;">
+                <span>📸</span> New Scan
+            </a>
             <div id="media-controls">
                 <button class="media-play-btn" id="custom-audio-play" onclick="toggleAudio()">⏸</button>
                 <div class="progress-container" id="audio-progress-container">

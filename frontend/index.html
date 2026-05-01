@@ -192,6 +192,11 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .feedback-pulse {
@@ -1028,9 +1033,14 @@
 
 <body>
     <div class="container">
-        <header>
-            <h1>🏛️ AR Museum Guide</h1>
-            <p>Discover artifacts with AI-powered recognition and Q&A</p>
+        <header style="display: flex; justify-content: space-between; align-items: center; text-align: left; margin-bottom: 40px;">
+            <div>
+                <h1 style="margin: 0; font-size: 2.2em;">🏛️ AR Museum Guide</h1>
+                <p style="margin-top: 5px; opacity: 0.8;">Discover artifacts with AI-powered recognition</p>
+            </div>
+            <a href="gallery.html" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 12px 24px; color: white; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(0)'">
+                <span style="font-size: 1.2em;">🖼️</span> Gallery
+            </a>
         </header>
 
         <div class="main-card">
@@ -1057,8 +1067,8 @@
                     </div>
                 </div>
 
-                <!-- Camera Mode -->
-                <div id="camera-mode" class="scan-interface">
+
+                <div id="scan-mode" class="scan-interface">
                     <div id="video-container" class="hidden">
                         <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="camera-overlay"></div>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifact Gallery — Museum Guide</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #ffffff;
+            --text-dim: #a0aaff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1a1a2e, #0a0a1a);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== BACKGROUND PARTICLES ===== */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header h1 {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, var(--text-dim));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.1em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== SEARCH BAR ===== */
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 50px;
+            z-index: 10;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 18px 25px 18px 60px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1em;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(102, 126, 234, 0.4);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--text-dim);
+        }
+
+        /* ===== GALLERY GRID ===== */
+        #gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .artifact-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .artifact-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .artifact-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+
+        .artifact-card:hover .artifact-img {
+            transform: scale(1.15);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 14px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .artifact-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .artifact-period {
+            font-size: 0.85em;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .artifact-desc {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 25px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .view-btn:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        #empty-state {
+            text-align: center;
+            padding: 60px;
+            display: none;
+        }
+
+        #empty-state div {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--glass);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.2em; }
+            .container { padding: 20px; }
+            #gallery-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>Exploring the Collection...</p>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Museum Gallery</h1>
+            <p>Explore centuries of history through our digital archive. Select an artifact to enter the immersive AR experience.</p>
+        </header>
+
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search artifacts, eras, or categories...">
+        </div>
+
+        <div id="gallery-grid">
+            <!-- Artifacts will be loaded here -->
+        </div>
+
+        <div id="empty-state">
+            <div>🔎</div>
+            <h2>No artifacts found</h2>
+            <p>Try searching for something else or browse by category.</p>
+        </div>
+    </div>
+
+    <script>
+        const TRAINING_API = `http://${window.location.hostname}:8001`;
+        let allArtifacts = [];
+
+        // Background Particles
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = Array.from({ length: 100 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                speedX: Math.random() * 0.5 - 0.25,
+                speedY: Math.random() * 0.5 - 0.25,
+                opacity: Math.random() * 0.5 + 0.2
+            }));
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(102, 126, 234, ${p.opacity})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        // Fetch Artifacts
+        async function loadGallery() {
+            try {
+                const response = await fetch(`${TRAINING_API}/api/artifacts/list`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allArtifacts = data.artifacts;
+                    renderArtifacts(allArtifacts);
+                }
+            } catch (err) {
+                console.error('Gallery load error:', err);
+                document.getElementById('gallery-grid').innerHTML = `<p style="text-align:center;color:#ff6b6b">Error connecting to Museum API.</p>`;
+            } finally {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        }
+
+        function renderArtifacts(list) {
+            const grid = document.getElementById('gallery-grid');
+            const empty = document.getElementById('empty-state');
+            
+            if (list.length === 0) {
+                grid.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            empty.style.display = 'none';
+
+            grid.innerHTML = list.map(item => {
+                const thumbnail = item.images && item.images.length > 0 
+                    ? `${TRAINING_API}/static/training/${item.id}/${item.images[0].split('\\').pop().split('/').pop()}`
+                    : 'https://via.placeholder.com/400x300?text=No+Image';
+
+                return `
+                    <div class="artifact-card" onclick="openAR('${item.id}', '${encodeURIComponent(item.name)}')">
+                        <div class="card-img-container">
+                            <img src="${thumbnail}" class="artifact-img" alt="${item.name}">
+                            <div class="category-badge">${item.category}</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="artifact-name">${item.name}</div>
+                            <div class="artifact-period">⏳ ${item.period} • 📍 ${item.origin}</div>
+                            <p class="artifact-desc">${item.description}</p>
+                            <button class="view-btn">
+                                📹 View in AR
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openAR(id, name) {
+            window.location.href = `ar_viewer.html?id=${id}&name=${name}`;
+        }
+
+        // Search Logic
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allArtifacts.filter(a => 
+                a.name.toLowerCase().includes(query) || 
+                a.category.toLowerCase().includes(query) || 
+                a.description.toLowerCase().includes(query) ||
+                a.period.toLowerCase().includes(query)
+            );
+            renderArtifacts(filtered);
+        });
+
+        // Initialize
+        initParticles();
+        animateParticles();
+        loadGallery();
+        window.addEventListener('resize', initParticles);
+    </script>
+</body>
+
+</html>

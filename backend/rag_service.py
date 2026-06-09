@@ -50,13 +50,20 @@ class RAGService:
             
     @property
     def embedding_model(self):
-        """Lazy load the embedding model and return as a ChromaDB compliant function"""
+        """Lazy load the ChromaDB embedding function wrapper (used only when creating collections)"""
         if self._embedding_model is None:
-            # Use specific embedding function wrapper for ChromaDB
             self._embedding_model = embedding_functions.SentenceTransformerEmbeddingFunction(
                 model_name='all-MiniLM-L6-v2'
             )
         return self._embedding_model
+
+    @property
+    def sentence_model(self):
+        """Lazy load raw SentenceTransformer for encoding query texts directly"""
+        if not hasattr(self, '_sentence_model') or self._sentence_model is None:
+            from sentence_transformers import SentenceTransformer
+            self._sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+        return self._sentence_model
 
     def extract_text_from_pdf(self, pdf_path: str) -> List[Dict[str, any]]:
         """
@@ -177,25 +184,37 @@ class RAGService:
         """
         try:
             collection_name = f"artifact_{artifact_id}"
-            
-            # Check if collection exists
+
+            # Get collection WITHOUT passing an embedding_function.
+            # Passing one would conflict with the function stored at collection-creation time.
             try:
-                collection = self.chroma_client.get_collection(
-                    name=collection_name,
-                    embedding_function=self.embedding_model
-                )
-            except Exception:
+                collection = self.chroma_client.get_collection(name=collection_name)
+            except Exception as e:
+                print(f"[RAG] Collection '{collection_name}' not found: {e}")
                 return {
                     'success': False,
-                    'answer': f"No documents found for this artifact. Please upload PDF documents first.",
+                    'answer': "No documents found for this artifact. Please upload PDF documents first.",
                     'sources': []
                 }
-            
+
+            # Embed the query text ourselves and pass query_embeddings directly,
+            # so ChromaDB never needs to call its stored embedding function.
+            try:
+                query_embedding = self.sentence_model.encode([question]).tolist()
+            except Exception as e:
+                print(f"[RAG] Failed to encode query: {e}")
+                return {
+                    'success': False,
+                    'answer': "Could not process your question. Please try again.",
+                    'sources': []
+                }
+
             # Query the collection
             results = collection.query(
-                query_texts=[question],
-                n_results=5  # Get top 5 most relevant chunks
+                query_embeddings=query_embedding,
+                n_results=5
             )
+
             
             if not results['documents'] or not results['documents'][0]:
                 return {

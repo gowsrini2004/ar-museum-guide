@@ -57,54 +57,62 @@ def train_artifact_model(data_dir, num_epochs=15, batch_size=4, learning_rate=0.
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
     
-    # Load dataset (will split later)
-    # Note: We'll use train_transform by default and override for validation
-    full_dataset = datasets.ImageFolder(data_dir, transform=train_transform)
-    if len(full_dataset.classes) < 2:
+    # Load dataset twice with different transforms so validation gets clean images
+    # and training gets augmented images — WITHOUT sharing the dataset object.
+    train_full = datasets.ImageFolder(data_dir, transform=train_transform)
+    val_full   = datasets.ImageFolder(data_dir, transform=val_transform)
+
+    if len(train_full.classes) < 2:
         raise ValueError("Need at least 2 artifact classes to train")
-    
+
+    # Deterministic split — same indices applied to both datasets
+    import random
+    total = len(train_full)
+    indices = list(range(total))
+    random.seed(42)
+    random.shuffle(indices)
+    train_size = int(0.85 * total)
+    train_indices = indices[:train_size]
+    val_indices   = indices[train_size:]
+
+    train_ds = torch.utils.data.Subset(train_full, train_indices)
+    val_ds   = torch.utils.data.Subset(val_full,   val_indices)
+
+    # Keep full_dataset reference for class info
+    full_dataset = train_full
+
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    val_loader   = DataLoader(val_ds,   batch_size=batch_size, shuffle=False)
+
     # Load pre-trained ConvNeXt-Base
     update_progress(0, num_epochs, status="building_model")
     model = models.convnext_base(weights=models.ConvNeXt_Base_Weights.IMAGENET1K_V1)
-    
-    # Fine-Tuning Strategy: 
+
+    # Fine-Tuning Strategy:
     # 1. Freeze everything first
     for param in model.parameters():
         param.requires_grad = False
-        
-    # 2. Unfreeze the last layer of features for "Fine-Grained" adaptation
-    # ConvNeXt_Base.features is a Sequential(0..7). Block 7 is the final stage.
+
+    # 2. Unfreeze last stage of features for fine-grained adaptation
     for param in model.features[7].parameters():
         param.requires_grad = True
-    
-    # 3. Rebuild classifier head with Dropout for accuracy/robustness
+
+    # 3. Rebuild classifier head with Dropout to prevent overfitting
     num_features = model.classifier[2].in_features
     model.classifier = nn.Sequential(
-        model.classifier[0], # LayerNorm2d
-        model.classifier[1], # Flatten
-        nn.Dropout(p=0.3),   # Prevent overfitting
+        model.classifier[0],  # LayerNorm2d
+        model.classifier[1],  # Flatten
+        nn.Dropout(p=0.3),
         nn.Linear(num_features, len(full_dataset.classes))
     )
-    
     model.to(device)
-    
-    # Split into train/val
-    train_size = int(0.85 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
-    train_ds, val_ds = torch.utils.data.random_split(full_dataset, [train_size, val_size])
-    
-    # Apply validation transform to val_ds
-    val_ds.dataset.transform = val_transform
-    
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
-    
-    # Loss and optimizer
-    # Use different learning rates for backbone vs head
+
+    # Loss and optimizer — different LRs for backbone vs head
     params = [
         {'params': model.features[7].parameters(), 'lr': learning_rate * 0.1},
         {'params': model.classifier.parameters(), 'lr': learning_rate}
     ]
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(params, weight_decay=1e-2)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)

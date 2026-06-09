@@ -3,10 +3,10 @@
     "id": "artifact_1",
     "name": "Srimad Bhagavad Gita ",
     "category": "Scripture ",
-    "period": "982",
-    "origin": "Indian",
+    "period": "400 BCE and 200 BCE",
+    "origin": "Haryana, India",
     "description": "The Bhagavad Gita (\"Song of God\") is a 700-verse Hindu scripture, part of the epic Mahabharata (Bhishma Parva, chapters 23–40). Set on the battlefield of Kurukshetra, it is a dialogue between Prince Arjuna and his charioteer, Lord Krishna, an avatar of Vishnu. It is a foundational text of Hinduism that serves as a guide for ethical living, duty, and spiritual liberation. ",
-    "curator": "Vayasa",
+    "curator": "Sage Vyasa",
     "images": [
       "training\\artifact_1\\artifact_1_1.jpg",
       "training\\artifact_1\\artifact_1_2.jpg",
@@ -43,15 +43,50 @@
       }
     ],
     "num_documents": 2,
-    "created_at": "2026-02-12T22:40:04.960054"
+    "created_at": "2026-02-12T22:40:04.960054",
+    "model_3d_path": "models_3d/artifact_1/model.glb",
+    "audio_path": "media/artifact_1/audio.mp3",
+    "video_path": "media/artifact_1/video.mp4",
+    "ar_cards": [
+      {
+        "icon": "📌",
+        "title": "Overview",
+        "body": "Bhagavad Gita is a sacred Hindu scripture and a part of the Mahabharata. It contains a conversation between Lord Krishna and Arjuna, offering guidance on life, duty, and spirituality.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Origin",
+        "body": "The Bhagavad Gita originated in Kurukshetra, Haryana, India, where Lord Krishna imparted its teachings to Arjuna before the great Mahabharata war.",
+        "color": "#884ce1"
+      },
+      {
+        "icon": "📌",
+        "title": "Author and Language",
+        "body": "The text is traditionally attributed to Sage Vyasa and was composed in Sanskrit. It consists of poetic verses that convey profound philosophical ideas.",
+        "color": "#4cd7e1"
+      },
+      {
+        "icon": "📌",
+        "title": "Structure",
+        "body": "The Bhagavad Gita contains 700 verses divided into 18 chapters. Each chapter focuses on different aspects of yoga, devotion, knowledge, and righteous action.",
+        "color": "#c8e14c"
+      },
+      {
+        "icon": "📌",
+        "title": "Significance",
+        "body": "The Bhagavad Gita teaches the importance of performing one's duty without attachment to results. Its timeless wisdom has influenced philosophers, leaders, and spiritual seekers worldwide.",
+        "color": "#e14c4c"
+      }
+    ]
   },
   {
     "id": "artifact_2",
     "name": "Thirukural",
-    "category": "Scripture ",
-    "period": "500",
-    "origin": "Tamilnadu ",
-    "description": "Written By thiruvallur the great tamil poet",
+    "category": "Scripture",
+    "period": "300 BCE and 500 CE",
+    "origin": "Tamil Nadu, India",
+    "description": "Thirukkural is an ancient Tamil masterpiece authored by Thiruvalluvar, consisting of 133 chapters and 1330 couplets. It is divided into three sections: Aram (Virtue), Porul (Wealth), and Inbam (Love), covering various aspects of human life. The work promotes moral values, good governance, and harmonious relationships, making it relevant across cultures and generations.",
     "curator": "Thiruvalluvar",
     "images": [
       "training\\artifact_2\\artifact_2_1.jpg",
@@ -87,164 +122,311 @@
       }
     ],
     "num_documents": 2,
-    "created_at": "2026-02-12T22:57:49.571671"
-  },
-  {
-    "id": "artifact_1770920155",
-    "name": "Shiva",
-    "category": "Idol",
-    "period": "500",
-    "origin": "Himalayas",
-    "description": "Idol ",
-    "curator": "Ahiva",
-    "images": [
-      "training\\artifact_1770920155\\artifact_1770920155_1.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_2.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_3.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_4.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_5.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_6.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_7.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_8.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_9.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_10.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_11.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_12.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_13.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_14.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_15.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_16.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_17.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_18.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_19.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_20.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_21.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_22.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_23.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_24.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_25.jpg",
-      "training\\artifact_1770920155\\artifact_1770920155_26.jpg"
-    ],
-    "num_images": 26,
-    "documents": [],
-    "num_documents": 0,
-    "created_at": "2026-02-12T23:46:00.596476"
-  },
-  {
-    "id": "artifact_1776488611",
-    "name": "Ice Box",
-    "category": "Indian",
-    "period": "today",
-    "origin": "chennai",
-    "description": "testing",
-    "curator": "gowtham ",
-    "images": [
-      "training\\artifact_1776488611\\artifact_1776488611_1.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_2.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_3.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_4.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_5.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_6.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_7.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_8.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_9.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_10.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_11.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_12.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_13.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_14.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_15.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_16.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_17.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_18.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_19.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_20.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_21.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_22.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_23.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_24.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_25.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_26.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_27.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_28.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_29.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_30.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_31.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_32.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_33.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_34.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_35.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_36.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_37.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_38.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_39.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_40.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_41.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_42.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_43.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_44.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_45.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_46.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_47.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_48.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_49.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_50.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_51.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_52.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_53.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_54.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_55.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_56.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_57.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_58.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_59.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_60.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_61.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_62.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_63.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_64.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_65.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_66.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_67.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_68.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_69.jpg",
-      "training\\artifact_1776488611\\artifact_1776488611_70.jpg"
-    ],
-    "num_images": 70,
-    "documents": [
-      {
-        "id": "doc_1",
-        "filename": "bhagavad-gita-in-english-source-file.pdf",
-        "path": "documents\\artifact_1776488611\\bhagavad-gita-in-english-source-file.pdf",
-        "uploaded_at": "2026-04-18T17:20:35.331878",
-        "processed": false
-      },
-      {
-        "id": "doc_2",
-        "filename": "The Bhagavad Gita.pdf",
-        "path": "documents\\artifact_1776488611\\The Bhagavad Gita.pdf",
-        "uploaded_at": "2026-04-18T17:20:35.348396",
-        "processed": false
-      }
-    ],
-    "num_documents": 2,
-    "created_at": "2026-04-18T10:33:40.230852",
-    "model_3d_path": "models_3d/artifact_1776488611/model.glb",
+    "created_at": "2026-02-12T22:57:49.571671",
+    "model_3d_path": "models_3d/artifact_2/model.glb",
+    "audio_path": "media/artifact_2/audio.mp3",
+    "video_path": "media/artifact_2/video.mp4",
     "ar_cards": [
       {
         "icon": "🏺",
-        "title": "Ice Box",
-        "body": "testing",
+        "title": "Overview",
+        "body": "Thirukkural is a classical Tamil literary work written by the poet-philosopher Thiruvalluvar. It is one of the most respected texts in Tamil literature and provides guidance for ethical living.",
         "color": "#667eea"
       },
       {
         "icon": "📅",
         "title": "Origin",
-        "body": "chennai",
+        "body": "The Thirukkural originated in ancient Tamil Nadu, India. Thiruvalluvar is traditionally associated with Mylapore (Chennai), though the exact place of composition is uncertain.",
         "color": "#764ba2"
+      },
+      {
+        "icon": "📌",
+        "title": "Period and Author",
+        "body": "The work was authored by Thiruvalluvar and is believed to have been composed around the 1st century BCE to 1st century CE, approximately 2,000 years ago.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Structure",
+        "body": "The Thirukkural consists of 1330 couplets (Kurals) arranged into 133 chapters. It is divided into three sections: Aram (Virtue), Porul (Wealth), and Inbam (Love).",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Significance",
+        "body": "The Thirukkural promotes moral values, good governance, social harmony, and personal discipline. Its universal teachings have made it one of the most translated and celebrated works of Tamil literature.",
+        "color": "#e04b8a"
+      }
+    ]
+  },
+  {
+    "id": "artifact_1780997064",
+    "name": "Wooden Buddha Sculpture",
+    "category": "Religious Artifact",
+    "period": "Medieval Period",
+    "origin": "India",
+    "description": "This wooden sculpture depicts Gautama Buddha in a calm and meditative posture, symbolizing enlightenment, wisdom, and inner peace. The intricate carving highlights the craftsmanship of traditional artisans and the spiritual significance of Buddhist art.",
+    "curator": "Crafted from wood, this artifact reflects the artistic traditions of Buddhist communities and demonstrates how religious beliefs were expressed through sculpture and decorative craftsmanship.",
+    "images": [
+      "training\\artifact_1780997064\\artifact_1780997064_1.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_2.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_3.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_4.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_5.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_6.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_7.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_8.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_9.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_10.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_11.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_12.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_13.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_14.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_15.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_16.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_17.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_18.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_19.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_20.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_21.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_22.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_23.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_24.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_25.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_26.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_27.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_28.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_29.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_30.jpg",
+      "training\\artifact_1780997064\\artifact_1780997064_31.jpg"
+    ],
+    "num_images": 31,
+    "documents": [
+      {
+        "id": "doc_1",
+        "filename": "Walpola Rahula - What the Buddha Taught.pdf.pdf",
+        "path": "documents\\artifact_1780997064\\Walpola Rahula - What the Buddha Taught.pdf.pdf",
+        "uploaded_at": "2026-06-09T22:16:14.481368",
+        "processed": false
+      },
+      {
+        "id": "doc_2",
+        "filename": "budlife.pdf",
+        "path": "documents\\artifact_1780997064\\budlife.pdf",
+        "uploaded_at": "2026-06-09T22:16:23.779441",
+        "processed": false
       }
     ],
-    "audio_path": "media/artifact_1776488611/audio.mp3",
-    "video_path": "media/artifact_1776488611/video.mp4"
+    "num_documents": 2,
+    "created_at": "2026-06-09T14:54:34.709924",
+    "model_3d_path": "models_3d/artifact_1780997064/model.glb",
+    "audio_path": "media/artifact_1780997064/audio.mp3",
+    "video_path": "media/artifact_1780997064/video.mp4",
+    "ar_cards": [
+      {
+        "icon": "🏺",
+        "title": "Overview",
+        "body": "Buddha Sculpture depicts Siddhartha Gautama, the founder of Buddhism. Such sculptures symbolize peace, wisdom, enlightenment, and compassion.",
+        "color": "#667eea"
+      },
+      {
+        "icon": "📅",
+        "title": "Historical Period",
+        "body": "This sculpture belongs to the Buddhist artistic tradition, which flourished in India from the 3rd century BCE onward. Different styles emerged during periods such as Gandhara, Mathura, and Gupta.",
+        "color": "#764ba2"
+      },
+      {
+        "icon": "📌",
+        "title": "Material and Craftsmanship",
+        "body": "Buddha sculptures were commonly carved from stone, bronze, marble, or wood. Artists paid special attention to facial expressions, posture, and symbolic hand gestures (mudras).",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Symbolism",
+        "body": "The sculpture's features carry deep meaning. The lotus position represents spiritual purity, while hand gestures such as Dharmachakra Mudra or Abhaya Mudra symbolize teaching, protection, and fearlessness.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Cultural Significance",
+        "body": "Buddha sculptures are important religious and cultural artifacts. They serve as objects of meditation and devotion and reflect the spread of Buddhist philosophy and art across Asia.",
+        "color": "#e04b8a"
+      }
+    ]
+  },
+  {
+    "id": "artifact_1781001817",
+    "name": "Bronze Ganesha Statue ",
+    "category": "Religious Sculpture ",
+    "period": "Chola Period (9th–13th Century CE)",
+    "origin": "Tamil Nadu, India",
+    "description": "This bronze statue depicts Lord Ganesha, the Hindu deity of wisdom, prosperity, and the remover of obstacles. The sculpture showcases fine metal craftsmanship, intricate ornaments, and traditional iconographic features associated with Ganesha.",
+    "curator": "Bronze Ganesha sculptures are significant examples of South Indian temple art. They reflect the advanced bronze-casting techniques of ancient artisans and highlight the cultural and religious importance of Ganesha worship.",
+    "images": [
+      "training\\artifact_1781001817\\artifact_1781001817_1.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_2.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_3.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_4.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_5.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_6.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_7.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_8.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_9.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_10.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_11.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_12.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_13.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_14.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_15.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_16.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_17.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_18.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_19.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_20.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_21.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_22.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_23.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_24.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_25.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_26.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_27.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_28.jpg",
+      "training\\artifact_1781001817\\artifact_1781001817_29.jpg"
+    ],
+    "num_images": 29,
+    "documents": [],
+    "num_documents": 0,
+    "created_at": "2026-06-09T16:13:40.833864",
+    "ar_cards": [
+      {
+        "icon": "🏺",
+        "title": "Bronze Ganesha Statue",
+        "body": "This bronze statue represents Lord Ganesha, one of the most revered deities in Hinduism, known as the remover of obstacles and the patron of wisdom.",
+        "color": "#667eea"
+      },
+      {
+        "icon": "📅",
+        "title": "Material",
+        "body": "Crafted from bronze using traditional lost-wax casting techniques, the statue demonstrates exceptional metallurgical and artistic skill.",
+        "color": "#764ba2"
+      },
+      {
+        "icon": "📌",
+        "title": "Origin",
+        "body": "The sculpture originates from Tamil Nadu, a region renowned for its rich tradition of bronze icon-making and temple art.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Symbolism",
+        "body": "Ganesha's elephant head symbolizes wisdom and intelligence, while his large ears represent attentive listening and learning.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Cultural Significance",
+        "body": "Bronze Ganesha statues are commonly used in temples and homes for worship and are important symbols of faith, prosperity, and auspicious beginnings.",
+        "color": "#e04b8a"
+      }
+    ],
+    "model_3d_path": "models_3d/artifact_1781001817/model.glb"
+  },
+  {
+    "id": "artifact_1781002305",
+    "name": "Wooden Jagannath Statue",
+    "category": "Religious Sculpture",
+    "period": "Medieval Period",
+    "origin": "Puri, Odisha, India",
+    "description": "This wooden statue depicts Lord Jagannath, a revered form of Lord Vishnu worshipped primarily in Odisha. The sculpture is characterized by its distinctive large eyes, vibrant appearance, and unique artistic style, reflecting centuries of devotional tradition.",
+    "curator": "Wooden Jagannath statues are central to the religious and cultural heritage of Puri. They represent the rich traditions associated with the Jagannath Temple and the world-famous Rath Yatra festival.",
+    "images": [
+      "training\\artifact_1781002305\\artifact_1781002305_1.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_2.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_3.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_4.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_5.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_6.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_7.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_8.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_9.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_10.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_11.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_12.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_13.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_14.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_15.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_16.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_17.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_18.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_19.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_20.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_21.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_22.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_23.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_24.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_25.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_26.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_27.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_28.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_29.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_30.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_31.jpg",
+      "training\\artifact_1781002305\\artifact_1781002305_32.jpg"
+    ],
+    "num_images": 32,
+    "documents": [
+      {
+        "id": "doc_1",
+        "filename": "Jagannatha_of_Puri.pdf",
+        "path": "documents\\artifact_1781002305\\Jagannatha_of_Puri.pdf",
+        "uploaded_at": "2026-06-09T22:41:22.527094",
+        "processed": false
+      },
+      {
+        "id": "doc_2",
+        "filename": "49-57.pdf",
+        "path": "documents\\artifact_1781002305\\49-57.pdf",
+        "uploaded_at": "2026-06-09T22:41:25.970320",
+        "processed": false
+      }
+    ],
+    "num_documents": 2,
+    "created_at": "2026-06-09T16:21:50.502472",
+    "ar_cards": [
+      {
+        "icon": "🏺",
+        "title": "Overview",
+        "body": "This wooden statue represents Lord Jagannath, a form of Lord Vishnu worshipped by millions of devotees across India, especially in Odisha.",
+        "color": "#667eea"
+      },
+      {
+        "icon": "📅",
+        "title": "Material",
+        "body": "Traditionally carved from sacred wood, Jagannath statues are renowned for their distinctive craftsmanship and symbolic design.",
+        "color": "#764ba2"
+      },
+      {
+        "icon": "📌",
+        "title": "Origin",
+        "body": "The statue originates from Puri, Odisha, home to the famous Jagannath Temple and one of Hinduism's most important pilgrimage sites.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Symbolism",
+        "body": "The large circular eyes symbolize divine vision and omnipresence, while the simplified form represents the universal and accessible nature of the deity.",
+        "color": "#e04b8a"
+      },
+      {
+        "icon": "📌",
+        "title": "Cultural Significance",
+        "body": "Lord Jagannath is deeply associated with the annual Rath Yatra (Chariot Festival), a major religious event that attracts millions of pilgrims and visitors from around the world.",
+        "color": "#e04b8a"
+      }
+    ],
+    "model_3d_path": "models_3d/artifact_1781002305/model.glb",
+    "audio_path": "media/artifact_1781002305/audio.mp3",
+    "video_path": "media/artifact_1781002305/video.mp4"
   }
 ]

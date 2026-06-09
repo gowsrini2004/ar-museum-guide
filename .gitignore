@@ -17,6 +17,14 @@ ENV/
 .idea/
 *.swp
 *.swo
+*.jpg
+*.pdf
+*.mp4
+*.glb
+*.obj
+*.mtl
+*.mp3
+*.png
 
 # Data
 data/artifacts/*.jpg

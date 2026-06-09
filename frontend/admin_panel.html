@@ -681,63 +681,60 @@
         <!-- Model Tab -->
         <div id="model-tab" class="tab-content">
             <div class="card">
-                <h2>Model Training & Status</h2>
-                <div style="text-align: center; margin-bottom: 30px;">
+                <div style="text-align: center; margin-bottom: 28px;">
+                    <h2 style="margin: 0 0 8px;">🤖 Model</h2>
                     <div id="training-status-badge" class="status-badge warning">Checking status...</div>
-                    <p id="training-message" style="margin-top: 10px; color: #666;"></p>
+                    <p id="training-message" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
                 </div>
 
+                <!-- Info Cards -->
                 <div class="stat-grid">
                     <div class="stat-card">
-                        <div class="stat-value" id="total-artifacts">0</div>
+                        <div class="stat-value" id="total-artifacts">—</div>
                         <div class="stat-label">Total Artifacts</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="total-images">0</div>
+                        <div class="stat-value" id="total-images">—</div>
                         <div class="stat-label">Training Images</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="model-accuracy">--</div>
+                        <div class="stat-value" id="model-accuracy">—</div>
                         <div class="stat-label">Model Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="last-trained" style="font-size: 18px;">Never</div>
+                        <div class="stat-label">Last Trained</div>
                     </div>
                 </div>
 
-                <div id="training-ui" style="margin-top: 20px; display: none;">
-                    <div class="progress-container" id="progress-container">
+                <!-- Training Progress (only visible during training) -->
+                <div id="training-ui" style="margin-top: 24px; display: none;">
+                    <div class="progress-container" id="progress-container" style="display: block;">
                         <div class="progress-bar" id="progress-bar">0%</div>
                     </div>
-                    <div class="training-details" id="training-details">
+                    <div class="training-details" id="training-details" style="display: flex;">
                         <span id="training-step">Initializing...</span>
                         <span id="training-epoch">Epoch: --/--</span>
                     </div>
                 </div>
 
-                <div id="advanced-metrics" class="metrics-grid" style="display: none;">
-                    <div class="metric-item">
-                        <div class="metric-value" id="last-trained">Never</div>
-                        <div class="metric-cw">Last Trained</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-value" id="metrics-epochs">--</div>
-                        <div class="metric-cw">Epochs</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-value" id="metrics-classes">--</div>
-                        <div class="metric-cw">Classes</div>
-                    </div>
+                <!-- 2 Action Buttons -->
+                <div id="model-actions" style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+                    <button id="train-btn" class="btn btn-primary" onclick="trainModel()"
+                        style="width: 100%; padding: 18px; font-size: 17px; border-radius: 12px;">
+                        🚀 Retrain Model
+                    </button>
+                    <button id="delete-model-btn" class="btn btn-danger" onclick="deleteModel()"
+                        style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; display: none;">
+                        🗑️ Delete Model
+                    </button>
                 </div>
 
-                <div id="model-actions" style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-                    <button id="train-btn" class="btn btn-primary" onclick="trainModel()"
-                        style="width: 100%; padding: 20px; font-size: 18px;">🚀 Train Model</button>
-                    <button id="delete-model-btn" class="btn btn-danger" onclick="deleteModel()"
-                        style="width: 100%; padding: 15px; font-size: 16px; display: none;">🗑️ Delete Model</button>
-                    <p style="text-align: center; font-size: 12px; color: #999; margin-top: 10px;">Note: Training may
-                        take several minutes depending on the number of artifacts.</p>
-                </div>
+                <p style="text-align: center; font-size: 12px; color: #bbb; margin-top: 14px;">
+                    Retraining picks up all artifacts automatically. May take a few minutes.
+                </p>
             </div>
         </div>
-    </div>
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
@@ -1294,6 +1291,9 @@
         function startProgressPolling() {
             if (progressInterval) return;
 
+            // Immediately display the training progress UI and hide model buttons
+            document.getElementById('training-ui').style.display = 'block';
+            document.getElementById('model-actions').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
             document.getElementById('training-details').style.display = 'flex';
             document.getElementById('train-btn').disabled = true;
@@ -1309,8 +1309,10 @@
                         stopProgressPolling();
                         if (data.status === 'completed') {
                             showToast('Training completed successfully!', 'success');
-                            updateStats();
+                        } else if (data.status === 'error') {
+                            showToast('❌ Training failed: ' + (data.message || 'Unknown error'), 'error');
                         }
+                        updateStats();
                     }
                 } catch (error) {
                     console.error('Polling error:', error);
@@ -1360,33 +1362,38 @@
             if (!confirm('Train the model with optimized Feature Caching? This will be much faster after initial extraction.')) return;
 
             const btn = document.getElementById('train-btn');
-            const debugEl = document.getElementById('debug-info');
             btn.innerHTML = '⏳ Initializing...';
             btn.disabled = true;
 
             try {
                 showToast('Training job submitted...', 'info');
 
-                // Show progress UI immediately
+                // Reset progress UI and show it immediately
+                document.getElementById('training-ui').style.display = 'block';
+                document.getElementById('model-actions').style.display = 'none';
                 document.getElementById('progress-container').style.display = 'block';
                 document.getElementById('training-details').style.display = 'flex';
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-bar').textContent = '0%';
+                document.getElementById('training-step').textContent = 'Initializing...';
+                document.getElementById('training-epoch').textContent = 'Epoch: --/--';
+
+                // Start polling first so the UI updates instantly
+                startProgressPolling();
 
                 // Submit training request
                 const response = await fetch(`${API_BASE}/api/model/train`, { method: 'POST' });
-
-                // Start polling immediately regardless of immediate response
-                // (Server handles it in background or sync, but we poll the file either way)
-                startProgressPolling();
-
                 const result = await response.json();
                 if (!result.success) {
                     showToast('❌ Training failed to start: ' + result.message, 'error');
                     stopProgressPolling();
+                    updateStats();
                 }
             } catch (error) {
                 console.error('Training Error:', error);
                 showToast('❌ Server error during training', 'error');
                 stopProgressPolling();
+                updateStats();
             }
         }
 
@@ -1434,7 +1441,6 @@
                 // Model status logic
                 const statusBadge = document.getElementById('training-status-badge');
                 const statusMsg = document.getElementById('training-message');
-                const advancedMetrics = document.getElementById('advanced-metrics');
 
                 if (data.model_trained) {
                     document.getElementById('train-btn').innerHTML = '🔄 Retrain Model';
@@ -1461,11 +1467,7 @@
 
                 // Update metrics
                 document.getElementById('model-accuracy').textContent = data.last_training_accuracy ? data.last_training_accuracy.toFixed(1) + '%' : 'N/A';
-                document.getElementById('last-trained').textContent = data.model_timestamp ? new Date(data.model_timestamp * 1000).toLocaleDateString() : 'N/A';
-                document.getElementById('metrics-epochs').textContent = data.training_epochs || 10;
-                document.getElementById('metrics-classes').textContent = data.total_artifacts;
-
-                advancedMetrics.style.display = 'grid';
+                document.getElementById('last-trained').textContent = data.model_timestamp ? new Date(data.model_timestamp * 1000).toLocaleString() : 'N/A';
 
                 // Check for active training to resume polling
                 const progressResponse = await fetch(`${API_BASE}/api/model/progress`);

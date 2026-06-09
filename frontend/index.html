@@ -1068,7 +1068,7 @@
                 </div>
 
 
-                <div id="scan-mode" class="scan-interface">
+                <div id="camera-mode" class="scan-interface">
                     <div id="video-container" class="hidden">
                         <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="camera-overlay"></div>
@@ -1403,7 +1403,7 @@
                     const name = data.prediction.artifact_name;
                     const id = data.prediction.artifact_id;
 
-                    if (confidence > 0.35) {
+                    if (confidence > 0.25) {
                         // Tier 1: High Confidence - show interactive overlay
                         recognitionBuffer.push(id);
                         if (recognitionBuffer.length > 5) recognitionBuffer.shift();
@@ -1415,7 +1415,7 @@
                         if (stabilityCount >= 3) {
                             showDetectionAlert(data);
                         }
-                    } else if (confidence > 0.20) {
+                    } else if (confidence > 0.15) {
                         // Tier 2: Low Confidence - uncertain
                         recognitionBuffer = [];
                         if (feedbackEl) feedbackEl.textContent = 'Checking... (Low Confidence)';

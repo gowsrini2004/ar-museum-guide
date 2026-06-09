@@ -944,7 +944,8 @@
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 0.5, 3.5);
+        // Camera looks at the model center (FLOOR_Y + half of ~1.8 height ≈ -0.1)
+        camera.position.set(0, 0.3, 3.5);
 
         // OrbitControls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -955,6 +956,7 @@
         controls.maxDistance = 8;
         controls.autoRotate = true;
         controls.autoRotateSpeed = 1.2;
+        controls.target.set(0, -0.1, 0); // orbit around model center, not world origin
 
         // Lighting rig
         const ambientLight = new THREE.AmbientLight(0x8899ff, 0.6);
@@ -972,18 +974,32 @@
         rimLight.position.set(0, -2, -3);
         scene.add(rimLight);
 
-        // Ground glow ring
-        const ringGeo = new THREE.RingGeometry(0.7, 1.0, 64);
+        // Ground glow ring — sits at y = -1 (the floor)
+        const FLOOR_Y = -1.0;
+        const ringGeo = new THREE.RingGeometry(0.7, 1.05, 64);
         const ringMat = new THREE.MeshBasicMaterial({
             color: 0x667eea,
             transparent: true,
-            opacity: 0.18,
+            opacity: 0.22,
             side: THREE.DoubleSide
         });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.rotation.x = -Math.PI / 2;
-        ring.position.y = -1;
+        ring.position.y = FLOOR_Y;
         scene.add(ring);
+
+        // Subtle inner disc for depth
+        const discGeo = new THREE.CircleGeometry(0.7, 64);
+        const discMat = new THREE.MeshBasicMaterial({
+            color: 0x4455cc,
+            transparent: true,
+            opacity: 0.07,
+            side: THREE.DoubleSide
+        });
+        const disc = new THREE.Mesh(discGeo, discMat);
+        disc.rotation.x = -Math.PI / 2;
+        disc.position.y = FLOOR_Y + 0.001;
+        scene.add(disc);
 
         // ========================
         // MODEL LOADING
@@ -1018,20 +1034,24 @@
         }
 
         function normalizeModel(model) {
+            // Compute bounding box ONCE before scaling (model at default scale/position)
             const box = new THREE.Box3().setFromObject(model);
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            
-            // Adjust scale for mobile portrait vs desktop
+
             const isMobile = window.innerWidth <= 768;
-            const scale = (isMobile ? 1.4 : 1.8) / maxDim;
-            
+            const targetHeight = isMobile ? 1.4 : 1.8;
+            const scale = targetHeight / maxDim;
+
             model.scale.setScalar(scale);
-            model.position.sub(center.multiplyScalar(scale));
-            
-            // Lift slightly on mobile to avoid bottom drawer
-            if (isMobile) model.position.y += 0.2;
+
+            // After scaling, the bounding box values are simply multiplied by scale.
+            // So: scaledMin.y = box.min.y * scale,  scaledCenter.x = center.x * scale
+            // Place the model's bottom edge exactly on FLOOR_Y, centered in X/Z.
+            model.position.x = -center.x * scale;
+            model.position.z = -center.z * scale;
+            model.position.y = FLOOR_Y - box.min.y * scale;
         }
 
         function loadFallbackMesh(artifactData) {
@@ -1044,8 +1064,9 @@
             const createMesh = (texture) => {
                 const group = new THREE.Group();
 
-                // Main body - stylized book/artifact form
-                const geo = new THREE.BoxGeometry(1.2, 1.6, 0.25, 4, 4, 1);
+                // Main body — stylized book/artifact form (1.6 tall)
+                const bookH = 1.6;
+                const geo = new THREE.BoxGeometry(1.2, bookH, 0.25, 4, 4, 1);
                 const mat = new THREE.MeshStandardMaterial({
                     map: texture || null,
                     color: texture ? 0xffffff : 0x9a8060,
@@ -1060,6 +1081,10 @@
                 const edgeMat = new THREE.LineBasicMaterial({ color: 0x8899ee, transparent: true, opacity: 0.4 });
                 const edgeLines = new THREE.LineSegments(edges, edgeMat);
                 group.add(edgeLines);
+
+                // Position: center X/Z = 0, bottom of box sits on FLOOR_Y
+                // BoxGeometry is centered at origin, so bottom is at -bookH/2
+                group.position.set(0, FLOOR_Y + bookH / 2, 0);
 
                 scene.add(group);
                 currentModel = group;
@@ -1079,8 +1104,9 @@
         }
 
         function resetCamera() {
-            camera.position.set(0, 0.5, 3.5);
-            controls.reset();
+            camera.position.set(0, 0.3, 3.5);
+            controls.target.set(0, -0.1, 0);
+            controls.update();
             controls.autoRotate = true;
             autoRotating = true;
             document.getElementById('rotate-btn').textContent = '⏸ Pause';

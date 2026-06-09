@@ -268,7 +268,7 @@ async def run_training_task():
         
         results = train_artifact_model(
             data_dir=str(TRAINING_DIR),
-            num_epochs=10,
+            num_epochs=20,
             batch_size=8
         )
         
